@@ -1,0 +1,1109 @@
+{
+  "model_info": {
+    "trained_at": "2026-06-26T06:40:09.768990",
+    "data_source": "NASA FIRMS VIIRS S-NPP Collection 2 (India 2012\u20132026)",
+    "satellite": "Suomi NPP / SNPP  |  Instrument: VIIRS",
+    "n_train": 202243,
+    "n_test": 125919,
+    "total_records_in_dataset": 8627741,
+    "date_range": [
+      "2012-01-20",
+      "2026-06-23"
+    ],
+    "frp_regressor": {
+      "algorithm": "LightGBM",
+      "rmse_mw": 6.559,
+      "mae_mw": 2.228,
+      "r2": 0.4084,
+      "r2_log": 0.6839,
+      "feature_importance": {
+        "longitude": 3871,
+        "latitude": 3831,
+        "bright_t31": 3558,
+        "temp_diff": 2624,
+        "brightness": 2595,
+        "doy": 1978,
+        "scan": 1869,
+        "sin_doy": 1616,
+        "pixel_area": 1414,
+        "year": 1355,
+        "track": 1326,
+        "cos_doy": 1222
+      }
+    },
+    "severity_classifier": {
+      "algorithm": "XGBoost",
+      "accuracy": 0.8959,
+      "classes": [
+        "Low",
+        "Medium",
+        "High",
+        "Extreme"
+      ],
+      "feature_importance": {
+        "is_day": 0.35768,
+        "brightness": 0.24487,
+        "conf_num": 0.06714,
+        "hour": 0.04681,
+        "longitude": 0.04156,
+        "scan": 0.03455,
+        "bright_t31": 0.02499,
+        "track": 0.02485,
+        "sin_month": 0.02225,
+        "temp_diff": 0.01672,
+        "season": 0.01667,
+        "sin_doy": 0.01515
+      }
+    }
+  },
+  "regional_predictions": [
+    {
+      "region": "Punjab Crop Belt",
+      "lat": 31.0,
+      "lon": 75.5,
+      "season": "post_monsoon",
+      "brightness_level": "low",
+      "brightness": 320,
+      "frp_predicted": 2.59,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.993,
+        0.007,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "region": "Punjab Crop Belt",
+      "lat": 31.0,
+      "lon": 75.5,
+      "season": "post_monsoon",
+      "brightness_level": "medium",
+      "brightness": 340,
+      "frp_predicted": 4.55,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.941,
+        0.059,
+        0.001,
+        0.0
+      ]
+    },
+    {
+      "region": "Punjab Crop Belt",
+      "lat": 31.0,
+      "lon": 75.5,
+      "season": "post_monsoon",
+      "brightness_level": "high",
+      "brightness": 355,
+      "frp_predicted": 7.9,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.611,
+        0.386,
+        0.003,
+        0.0
+      ]
+    },
+    {
+      "region": "Punjab Crop Belt",
+      "lat": 31.0,
+      "lon": 75.5,
+      "season": "post_monsoon",
+      "brightness_level": "extreme",
+      "brightness": 365,
+      "frp_predicted": 9.43,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.557,
+        0.44,
+        0.003,
+        0.0
+      ]
+    },
+    {
+      "region": "Haryana Crop Belt",
+      "lat": 29.5,
+      "lon": 76.5,
+      "season": "post_monsoon",
+      "brightness_level": "low",
+      "brightness": 320,
+      "frp_predicted": 2.35,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.995,
+        0.005,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "region": "Haryana Crop Belt",
+      "lat": 29.5,
+      "lon": 76.5,
+      "season": "post_monsoon",
+      "brightness_level": "medium",
+      "brightness": 340,
+      "frp_predicted": 4.44,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.962,
+        0.038,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "region": "Haryana Crop Belt",
+      "lat": 29.5,
+      "lon": 76.5,
+      "season": "post_monsoon",
+      "brightness_level": "high",
+      "brightness": 355,
+      "frp_predicted": 7.91,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.654,
+        0.344,
+        0.003,
+        0.0
+      ]
+    },
+    {
+      "region": "Haryana Crop Belt",
+      "lat": 29.5,
+      "lon": 76.5,
+      "season": "post_monsoon",
+      "brightness_level": "extreme",
+      "brightness": 365,
+      "frp_predicted": 9.45,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.602,
+        0.395,
+        0.003,
+        0.0
+      ]
+    },
+    {
+      "region": "Uttar Pradesh",
+      "lat": 27.0,
+      "lon": 81.0,
+      "season": "post_monsoon",
+      "brightness_level": "low",
+      "brightness": 320,
+      "frp_predicted": 2.32,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.997,
+        0.003,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "region": "Uttar Pradesh",
+      "lat": 27.0,
+      "lon": 81.0,
+      "season": "post_monsoon",
+      "brightness_level": "medium",
+      "brightness": 340,
+      "frp_predicted": 4.51,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.974,
+        0.025,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "region": "Uttar Pradesh",
+      "lat": 27.0,
+      "lon": 81.0,
+      "season": "post_monsoon",
+      "brightness_level": "high",
+      "brightness": 355,
+      "frp_predicted": 8.21,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.704,
+        0.292,
+        0.004,
+        0.0
+      ]
+    },
+    {
+      "region": "Uttar Pradesh",
+      "lat": 27.0,
+      "lon": 81.0,
+      "season": "post_monsoon",
+      "brightness_level": "extreme",
+      "brightness": 365,
+      "frp_predicted": 9.74,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.647,
+        0.349,
+        0.004,
+        0.0
+      ]
+    },
+    {
+      "region": "Madhya Pradesh Forests",
+      "lat": 22.5,
+      "lon": 78.5,
+      "season": "summer",
+      "brightness_level": "low",
+      "brightness": 320,
+      "frp_predicted": 3.18,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.979,
+        0.02,
+        0.001,
+        0.0
+      ]
+    },
+    {
+      "region": "Madhya Pradesh Forests",
+      "lat": 22.5,
+      "lon": 78.5,
+      "season": "summer",
+      "brightness_level": "medium",
+      "brightness": 340,
+      "frp_predicted": 4.76,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.96,
+        0.039,
+        0.001,
+        0.0
+      ]
+    },
+    {
+      "region": "Madhya Pradesh Forests",
+      "lat": 22.5,
+      "lon": 78.5,
+      "season": "summer",
+      "brightness_level": "high",
+      "brightness": 355,
+      "frp_predicted": 10.06,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.637,
+        0.359,
+        0.004,
+        0.0
+      ]
+    },
+    {
+      "region": "Madhya Pradesh Forests",
+      "lat": 22.5,
+      "lon": 78.5,
+      "season": "summer",
+      "brightness_level": "extreme",
+      "brightness": 365,
+      "frp_predicted": 12.15,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.576,
+        0.419,
+        0.005,
+        0.0
+      ]
+    },
+    {
+      "region": "Odisha Forests",
+      "lat": 20.5,
+      "lon": 84.5,
+      "season": "summer",
+      "brightness_level": "low",
+      "brightness": 320,
+      "frp_predicted": 3.21,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.989,
+        0.01,
+        0.001,
+        0.0
+      ]
+    },
+    {
+      "region": "Odisha Forests",
+      "lat": 20.5,
+      "lon": 84.5,
+      "season": "summer",
+      "brightness_level": "medium",
+      "brightness": 340,
+      "frp_predicted": 4.51,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.971,
+        0.028,
+        0.001,
+        0.0
+      ]
+    },
+    {
+      "region": "Odisha Forests",
+      "lat": 20.5,
+      "lon": 84.5,
+      "season": "summer",
+      "brightness_level": "high",
+      "brightness": 355,
+      "frp_predicted": 9.88,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.67,
+        0.316,
+        0.013,
+        0.0
+      ]
+    },
+    {
+      "region": "Odisha Forests",
+      "lat": 20.5,
+      "lon": 84.5,
+      "season": "summer",
+      "brightness_level": "extreme",
+      "brightness": 365,
+      "frp_predicted": 11.95,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.594,
+        0.39,
+        0.015,
+        0.0
+      ]
+    },
+    {
+      "region": "Assam / NE India",
+      "lat": 26.0,
+      "lon": 93.0,
+      "season": "summer",
+      "brightness_level": "low",
+      "brightness": 320,
+      "frp_predicted": 3.54,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.945,
+        0.033,
+        0.021,
+        0.0
+      ]
+    },
+    {
+      "region": "Assam / NE India",
+      "lat": 26.0,
+      "lon": 93.0,
+      "season": "summer",
+      "brightness_level": "medium",
+      "brightness": 340,
+      "frp_predicted": 5.91,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.809,
+        0.152,
+        0.038,
+        0.0
+      ]
+    },
+    {
+      "region": "Assam / NE India",
+      "lat": 26.0,
+      "lon": 93.0,
+      "season": "summer",
+      "brightness_level": "high",
+      "brightness": 355,
+      "frp_predicted": 16.77,
+      "severity": 1,
+      "severity_label": "Medium",
+      "severity_prob": [
+        0.255,
+        0.666,
+        0.077,
+        0.002
+      ]
+    },
+    {
+      "region": "Assam / NE India",
+      "lat": 26.0,
+      "lon": 93.0,
+      "season": "summer",
+      "brightness_level": "extreme",
+      "brightness": 365,
+      "frp_predicted": 22.33,
+      "severity": 1,
+      "severity_label": "Medium",
+      "severity_prob": [
+        0.212,
+        0.683,
+        0.103,
+        0.002
+      ]
+    },
+    {
+      "region": "West Bengal",
+      "lat": 23.5,
+      "lon": 87.5,
+      "season": "winter",
+      "brightness_level": "low",
+      "brightness": 320,
+      "frp_predicted": 2.59,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.996,
+        0.004,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "region": "West Bengal",
+      "lat": 23.5,
+      "lon": 87.5,
+      "season": "winter",
+      "brightness_level": "medium",
+      "brightness": 340,
+      "frp_predicted": 4.55,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.972,
+        0.027,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "region": "West Bengal",
+      "lat": 23.5,
+      "lon": 87.5,
+      "season": "winter",
+      "brightness_level": "high",
+      "brightness": 355,
+      "frp_predicted": 8.17,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.655,
+        0.342,
+        0.003,
+        0.0
+      ]
+    },
+    {
+      "region": "West Bengal",
+      "lat": 23.5,
+      "lon": 87.5,
+      "season": "winter",
+      "brightness_level": "extreme",
+      "brightness": 365,
+      "frp_predicted": 9.4,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.609,
+        0.388,
+        0.003,
+        0.0
+      ]
+    },
+    {
+      "region": "Rajasthan",
+      "lat": 26.0,
+      "lon": 73.5,
+      "season": "summer",
+      "brightness_level": "low",
+      "brightness": 320,
+      "frp_predicted": 3.11,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.984,
+        0.016,
+        0.001,
+        0.0
+      ]
+    },
+    {
+      "region": "Rajasthan",
+      "lat": 26.0,
+      "lon": 73.5,
+      "season": "summer",
+      "brightness_level": "medium",
+      "brightness": 340,
+      "frp_predicted": 4.47,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.967,
+        0.032,
+        0.001,
+        0.0
+      ]
+    },
+    {
+      "region": "Rajasthan",
+      "lat": 26.0,
+      "lon": 73.5,
+      "season": "summer",
+      "brightness_level": "high",
+      "brightness": 355,
+      "frp_predicted": 9.55,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.722,
+        0.274,
+        0.004,
+        0.0
+      ]
+    },
+    {
+      "region": "Rajasthan",
+      "lat": 26.0,
+      "lon": 73.5,
+      "season": "summer",
+      "brightness_level": "extreme",
+      "brightness": 365,
+      "frp_predicted": 10.97,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.662,
+        0.331,
+        0.006,
+        0.0
+      ]
+    },
+    {
+      "region": "Andhra Pradesh",
+      "lat": 16.0,
+      "lon": 80.0,
+      "season": "summer",
+      "brightness_level": "low",
+      "brightness": 320,
+      "frp_predicted": 3.1,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.982,
+        0.017,
+        0.001,
+        0.0
+      ]
+    },
+    {
+      "region": "Andhra Pradesh",
+      "lat": 16.0,
+      "lon": 80.0,
+      "season": "summer",
+      "brightness_level": "medium",
+      "brightness": 340,
+      "frp_predicted": 4.56,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.96,
+        0.039,
+        0.001,
+        0.0
+      ]
+    },
+    {
+      "region": "Andhra Pradesh",
+      "lat": 16.0,
+      "lon": 80.0,
+      "season": "summer",
+      "brightness_level": "high",
+      "brightness": 355,
+      "frp_predicted": 9.25,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.606,
+        0.387,
+        0.007,
+        0.0
+      ]
+    },
+    {
+      "region": "Andhra Pradesh",
+      "lat": 16.0,
+      "lon": 80.0,
+      "season": "summer",
+      "brightness_level": "extreme",
+      "brightness": 365,
+      "frp_predicted": 10.98,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.526,
+        0.463,
+        0.011,
+        0.0
+      ]
+    },
+    {
+      "region": "Karnataka",
+      "lat": 14.0,
+      "lon": 76.0,
+      "season": "summer",
+      "brightness_level": "low",
+      "brightness": 320,
+      "frp_predicted": 3.09,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.973,
+        0.026,
+        0.002,
+        0.0
+      ]
+    },
+    {
+      "region": "Karnataka",
+      "lat": 14.0,
+      "lon": 76.0,
+      "season": "summer",
+      "brightness_level": "medium",
+      "brightness": 340,
+      "frp_predicted": 4.6,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.949,
+        0.049,
+        0.002,
+        0.0
+      ]
+    },
+    {
+      "region": "Karnataka",
+      "lat": 14.0,
+      "lon": 76.0,
+      "season": "summer",
+      "brightness_level": "high",
+      "brightness": 355,
+      "frp_predicted": 9.49,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.566,
+        0.424,
+        0.01,
+        0.0
+      ]
+    },
+    {
+      "region": "Karnataka",
+      "lat": 14.0,
+      "lon": 76.0,
+      "season": "summer",
+      "brightness_level": "extreme",
+      "brightness": 365,
+      "frp_predicted": 11.31,
+      "severity": 1,
+      "severity_label": "Medium",
+      "severity_prob": [
+        0.483,
+        0.502,
+        0.014,
+        0.0
+      ]
+    },
+    {
+      "region": "Chhattisgarh",
+      "lat": 21.0,
+      "lon": 82.5,
+      "season": "summer",
+      "brightness_level": "low",
+      "brightness": 320,
+      "frp_predicted": 3.21,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.985,
+        0.014,
+        0.001,
+        0.0
+      ]
+    },
+    {
+      "region": "Chhattisgarh",
+      "lat": 21.0,
+      "lon": 82.5,
+      "season": "summer",
+      "brightness_level": "medium",
+      "brightness": 340,
+      "frp_predicted": 4.57,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.965,
+        0.035,
+        0.001,
+        0.0
+      ]
+    },
+    {
+      "region": "Chhattisgarh",
+      "lat": 21.0,
+      "lon": 82.5,
+      "season": "summer",
+      "brightness_level": "high",
+      "brightness": 355,
+      "frp_predicted": 9.79,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.644,
+        0.349,
+        0.007,
+        0.0
+      ]
+    },
+    {
+      "region": "Chhattisgarh",
+      "lat": 21.0,
+      "lon": 82.5,
+      "season": "summer",
+      "brightness_level": "extreme",
+      "brightness": 365,
+      "frp_predicted": 11.64,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.572,
+        0.419,
+        0.009,
+        0.0
+      ]
+    },
+    {
+      "region": "Bihar",
+      "lat": 25.5,
+      "lon": 85.5,
+      "season": "post_monsoon",
+      "brightness_level": "low",
+      "brightness": 320,
+      "frp_predicted": 2.43,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.997,
+        0.003,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "region": "Bihar",
+      "lat": 25.5,
+      "lon": 85.5,
+      "season": "post_monsoon",
+      "brightness_level": "medium",
+      "brightness": 340,
+      "frp_predicted": 4.52,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.977,
+        0.023,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "region": "Bihar",
+      "lat": 25.5,
+      "lon": 85.5,
+      "season": "post_monsoon",
+      "brightness_level": "high",
+      "brightness": 355,
+      "frp_predicted": 8.63,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.694,
+        0.302,
+        0.004,
+        0.0
+      ]
+    },
+    {
+      "region": "Bihar",
+      "lat": 25.5,
+      "lon": 85.5,
+      "season": "post_monsoon",
+      "brightness_level": "extreme",
+      "brightness": 365,
+      "frp_predicted": 9.8,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.641,
+        0.354,
+        0.005,
+        0.0
+      ]
+    },
+    {
+      "region": "Delhi NCR",
+      "lat": 28.7,
+      "lon": 77.2,
+      "season": "winter",
+      "brightness_level": "low",
+      "brightness": 320,
+      "frp_predicted": 2.37,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.994,
+        0.006,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "region": "Delhi NCR",
+      "lat": 28.7,
+      "lon": 77.2,
+      "season": "winter",
+      "brightness_level": "medium",
+      "brightness": 340,
+      "frp_predicted": 4.54,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.964,
+        0.036,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "region": "Delhi NCR",
+      "lat": 28.7,
+      "lon": 77.2,
+      "season": "winter",
+      "brightness_level": "high",
+      "brightness": 355,
+      "frp_predicted": 8.55,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.646,
+        0.352,
+        0.002,
+        0.0
+      ]
+    },
+    {
+      "region": "Delhi NCR",
+      "lat": 28.7,
+      "lon": 77.2,
+      "season": "winter",
+      "brightness_level": "extreme",
+      "brightness": 365,
+      "frp_predicted": 10.03,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.602,
+        0.395,
+        0.003,
+        0.0
+      ]
+    },
+    {
+      "region": "Uttarakhand Forests",
+      "lat": 30.0,
+      "lon": 79.5,
+      "season": "summer",
+      "brightness_level": "low",
+      "brightness": 320,
+      "frp_predicted": 3.61,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.973,
+        0.026,
+        0.001,
+        0.0
+      ]
+    },
+    {
+      "region": "Uttarakhand Forests",
+      "lat": 30.0,
+      "lon": 79.5,
+      "season": "summer",
+      "brightness_level": "medium",
+      "brightness": 340,
+      "frp_predicted": 5.15,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.947,
+        0.052,
+        0.001,
+        0.0
+      ]
+    },
+    {
+      "region": "Uttarakhand Forests",
+      "lat": 30.0,
+      "lon": 79.5,
+      "season": "summer",
+      "brightness_level": "high",
+      "brightness": 355,
+      "frp_predicted": 11.25,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.567,
+        0.429,
+        0.004,
+        0.0
+      ]
+    },
+    {
+      "region": "Uttarakhand Forests",
+      "lat": 30.0,
+      "lon": 79.5,
+      "season": "summer",
+      "brightness_level": "extreme",
+      "brightness": 365,
+      "frp_predicted": 12.84,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.503,
+        0.492,
+        0.004,
+        0.0
+      ]
+    },
+    {
+      "region": "Kerala Forests",
+      "lat": 10.5,
+      "lon": 76.5,
+      "season": "summer",
+      "brightness_level": "low",
+      "brightness": 320,
+      "frp_predicted": 4.21,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.956,
+        0.042,
+        0.002,
+        0.0
+      ]
+    },
+    {
+      "region": "Kerala Forests",
+      "lat": 10.5,
+      "lon": 76.5,
+      "season": "summer",
+      "brightness_level": "medium",
+      "brightness": 340,
+      "frp_predicted": 6.56,
+      "severity": 0,
+      "severity_label": "Low",
+      "severity_prob": [
+        0.9,
+        0.098,
+        0.002,
+        0.0
+      ]
+    },
+    {
+      "region": "Kerala Forests",
+      "lat": 10.5,
+      "lon": 76.5,
+      "season": "summer",
+      "brightness_level": "high",
+      "brightness": 355,
+      "frp_predicted": 12.68,
+      "severity": 1,
+      "severity_label": "Medium",
+      "severity_prob": [
+        0.372,
+        0.609,
+        0.019,
+        0.0
+      ]
+    },
+    {
+      "region": "Kerala Forests",
+      "lat": 10.5,
+      "lon": 76.5,
+      "season": "summer",
+      "brightness_level": "extreme",
+      "brightness": 365,
+      "frp_predicted": 15.08,
+      "severity": 1,
+      "severity_label": "Medium",
+      "severity_prob": [
+        0.297,
+        0.674,
+        0.028,
+        0.0
+      ]
+    }
+  ],
+  "feature_columns": [
+    "latitude",
+    "longitude",
+    "brightness",
+    "bright_t31",
+    "temp_diff",
+    "scan",
+    "track",
+    "pixel_area",
+    "is_day",
+    "conf_num",
+    "fire_type",
+    "year",
+    "month",
+    "doy",
+    "hour",
+    "season",
+    "sin_month",
+    "cos_month",
+    "sin_doy",
+    "cos_doy"
+  ],
+  "severity_classes": [
+    "Low (<10 MW)",
+    "Medium (10\u201350 MW)",
+    "High (50\u2013200 MW)",
+    "Extreme (>200 MW)"
+  ]
+}
