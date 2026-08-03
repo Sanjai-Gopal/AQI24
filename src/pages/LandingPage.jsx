@@ -227,7 +227,7 @@ export default function LandingPage({ onEnter }) {
               <motion.a
                 whileHover={{ scale: 1.03, boxShadow: '0 0 20px rgba(34,211,238,0.2)' }}
                 whileTap={{ scale: 0.97 }}
-                href="https://github.com/dino-coders/aqi24"
+                href="https://github.com/Sanjai-Gopal/AQI24"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-glow w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-medium text-sm text-slate-200 transition-all border border-slate-700/50 bg-slate-800/30 backdrop-blur-sm hover:bg-slate-800/50 hover:border-cyan-400/30"
