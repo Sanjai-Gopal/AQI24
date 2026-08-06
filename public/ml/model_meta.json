@@ -1,0 +1,94 @@
+{
+  "trained_at": "2026-06-26T06:40:09.768990",
+  "data_source": "NASA FIRMS VIIRS S-NPP Collection 2 (India 2012\u20132026)",
+  "satellite": "Suomi NPP / SNPP  |  Instrument: VIIRS",
+  "n_train": 202243,
+  "n_test": 125919,
+  "total_sampled": 328162,
+  "archive_total": 8627741,
+  "date_range": [
+    "2012-01-20",
+    "2026-06-23"
+  ],
+  "features": [
+    "latitude",
+    "longitude",
+    "brightness",
+    "bright_t31",
+    "temp_diff",
+    "scan",
+    "track",
+    "pixel_area",
+    "is_day",
+    "conf_num",
+    "fire_type",
+    "year",
+    "month",
+    "doy",
+    "hour",
+    "season",
+    "sin_month",
+    "cos_month",
+    "sin_doy",
+    "cos_doy"
+  ],
+  "frp_regressor": {
+    "algorithm": "LightGBM",
+    "target": "Fire Radiative Power (log1p-transformed, MW)",
+    "rmse_mw": 6.559,
+    "mae_mw": 2.228,
+    "r2": 0.4084,
+    "r2_log": 0.6839,
+    "rmse_log": 0.3795,
+    "feature_importance": {
+      "longitude": 3871,
+      "latitude": 3831,
+      "bright_t31": 3558,
+      "temp_diff": 2624,
+      "brightness": 2595,
+      "doy": 1978,
+      "scan": 1869,
+      "sin_doy": 1616,
+      "pixel_area": 1414,
+      "year": 1355,
+      "track": 1326,
+      "cos_doy": 1222
+    }
+  },
+  "severity_classifier": {
+    "algorithm": "XGBoost",
+    "target": "Fire Severity (0=Low<10MW, 1=Med 10-50, 2=High 50-200, 3=Extreme>200)",
+    "accuracy": 0.8959,
+    "classes": [
+      "Low",
+      "Medium",
+      "High",
+      "Extreme"
+    ],
+    "feature_importance": {
+      "is_day": 0.35768,
+      "brightness": 0.24487,
+      "conf_num": 0.06714,
+      "hour": 0.04681,
+      "longitude": 0.04156,
+      "scan": 0.03455,
+      "bright_t31": 0.02499,
+      "track": 0.02485,
+      "sin_month": 0.02225,
+      "temp_diff": 0.01672,
+      "season": 0.01667,
+      "sin_doy": 0.01515
+    }
+  },
+  "coverage": {
+    "lat_range": [
+      8.0,
+      34.71
+    ],
+    "lon_range": [
+      68.52,
+      97.11
+    ],
+    "n_years": 15
+  }
+}
