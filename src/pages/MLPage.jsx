@@ -17,12 +17,13 @@ function Skeleton({ h = 'h-40' }) {
 }
 
 function MetricBadge({ label, value, unit, color, sub }) {
+  const display = value == null || value === '' ? '—' : value;
   return (
     <div className="panel p-4 relative overflow-hidden">
       <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full pointer-events-none"
         style={{ background: `${color}20`, filter: 'blur(16px)' }} />
       <div className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-1">{label}</div>
-      <div className="text-2xl font-black font-mono" style={{ color }}>{value}</div>
+      <div className="text-2xl font-black font-mono" style={{ color }}>{display}</div>
       {unit && <div className="text-[10px] text-slate-500 font-mono mt-0.5">{unit}</div>}
       {sub && <div className="text-[10px] text-slate-600 mt-1">{sub}</div>}
     </div>
@@ -31,7 +32,7 @@ function MetricBadge({ label, value, unit, color, sub }) {
 
 // Workflow steps for the architecture diagram
 const WORKFLOW = [
-  { step: '01', title: 'Data Acquisition', icon: Database, color: '#22d3ee', desc: 'NASA FIRMS VIIRS S-NPP fire detections (8.6M records, 2012–2026)' },
+  { step: '01', title: 'Data Acquisition', icon: Database, color: '#22d3ee', desc: 'NASA FIRMS VIIRS S-NPP archive (2012–2026) — sampled for training' },
   { step: '02', title: 'Feature Engineering', icon: Layers, color: '#a78bfa', desc: 'Brightness, coordinates, seasonal cyclical encoding, pixel geometry' },
   { step: '03', title: 'Model Training', icon: Cpu, color: '#fbbf24', desc: 'LightGBM regressor + XGBoost classifier, temporal split' },
   { step: '04', title: 'Inference', icon: Zap, color: '#34d399', desc: 'FRP prediction (MW) + 4-class severity classification' },
@@ -63,24 +64,35 @@ export default function MLPage() {
     [filteredPreds]
   );
 
+  const reg = info?.frp_regressor || {};
+  const clf = info?.severity_classifier || {};
+  const totalRecords = info?.total_records_in_dataset ?? info?.archive_total ?? null;
+
+  const fmtNum = (v, digits = 2) =>
+    v == null || isNaN(v) ? '—' : Number(v).toFixed(digits);
+  const fmtPct = (v, digits = 1) =>
+    v == null || isNaN(v) ? '—' : `${(Number(v) * 100).toFixed(digits)}%`;
+  const fmtInt = (v) =>
+    v == null || isNaN(v) ? '—' : Number(v).toLocaleString();
+
   const featureImportance = useMemo(() => info
-    ? Object.entries(info.frp_regressor?.feature_importance || {})
+    ? Object.entries(reg?.feature_importance || {})
         .slice(0, 8)
         .map(([k, v]) => ({ name: k.replace('_', '\n'), value: +(v * 100).toFixed(2) }))
-    : [], [info]);
+    : [], [info, reg]);
 
   const clsImportance = useMemo(() => info
-    ? Object.entries(info.severity_classifier?.feature_importance || {})
+    ? Object.entries(clf?.feature_importance || {})
         .slice(0, 8)
         .map(([k, v]) => ({ name: k.replace('_', '\n'), value: +(v * 100).toFixed(2) }))
-    : [], [info]);
+    : [], [info, clf]);
 
   return (
     <div className="p-4 md:p-6 space-y-8">
       <PageHeader
         eyebrow="Machine Learning · NASA FIRMS VIIRS S-NPP"
         title="Fire Radiative Power Prediction"
-        description="XGBoost & LightGBM models trained on 8.6M real VIIRS fire detections across India (2012–2026). Predicts FRP (MW) and fire severity class."
+        description="LightGBM FRP regressor and XGBoost severity classifier trained on NASA FIRMS VIIRS S-NPP fire detections across India (2012–2026). Predicts FRP (MW) and fire severity class."
         accent="violet"
       >
         {info && (
@@ -140,13 +152,13 @@ export default function MLPage() {
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <MetricBadge label="Training Records" value={info.n_train?.toLocaleString()} color="#a78bfa"
-            sub={`From ${info.total_records_in_dataset?.toLocaleString()} total detections`} />
-          <MetricBadge label="Test Records (2025+)" value={info.n_test?.toLocaleString()} color="#22d3ee"
+          <MetricBadge label="Training Records" value={fmtInt(info?.n_train)} color="#a78bfa"
+            sub={`From ${fmtInt(totalRecords)} total archive detections`} />
+          <MetricBadge label="Test Records (2025+)" value={fmtInt(info?.n_test)} color="#22d3ee"
             sub="Time-aware temporal split" />
-          <MetricBadge label="FRP log-R²" value={info.frp_regressor?.r2_log} color="#34d399"
-            unit="LightGBM regressor" sub={`MAE: ${info.frp_regressor?.mae_mw} MW`} />
-          <MetricBadge label="Severity Accuracy" value={`${(info.severity_classifier?.accuracy * 100).toFixed(1)}%`}
+          <MetricBadge label="FRP log-R²" value={fmtNum(reg?.r2_log, 4)} color="#34d399"
+            unit="LightGBM regressor" sub={`MAE: ${fmtNum(reg?.mae_mw)} MW`} />
+          <MetricBadge label="Severity Accuracy" value={fmtPct(clf?.accuracy)}
             color="#fbbf24" unit="XGBoost classifier" sub="4-class: Low/Med/High/Extreme" />
         </div>
       )}
@@ -157,13 +169,13 @@ export default function MLPage() {
           className="panel p-4 grid md:grid-cols-3 gap-4 text-xs font-mono">
           <div>
             <div className="text-slate-500 uppercase tracking-widest text-[10px] mb-2">Dataset</div>
-            <div className="text-slate-300">{info.data_source}</div>
-            <div className="text-slate-500 mt-1">{info.date_range?.[0]} → {info.date_range?.[1]}</div>
+            <div className="text-slate-300">{info.data_source || 'Not available'}</div>
+            <div className="text-slate-500 mt-1">{info.date_range?.[0] ?? '—'} → {info.date_range?.[1] ?? '—'}</div>
           </div>
           <div>
             <div className="text-slate-500 uppercase tracking-widest text-[10px] mb-2">Algorithms</div>
-            <div className="text-slate-300">FRP: {info.frp_regressor?.algorithm} (log1p target)</div>
-            <div className="text-slate-300">Severity: {info.severity_classifier?.algorithm} (4-class)</div>
+            <div className="text-slate-300">FRP: {reg?.algorithm || 'Not available'} (log1p target)</div>
+            <div className="text-slate-300">Severity: {clf?.algorithm || 'Not available'} (4-class)</div>
           </div>
           <div>
             <div className="text-slate-500 uppercase tracking-widest text-[10px] mb-2">Validation</div>
@@ -292,13 +304,13 @@ export default function MLPage() {
                   icon: TrendingUp,
                   color: '#a78bfa',
                   rows: [
-                    ['Algorithm', info.frp_regressor?.algorithm],
+                    ['Algorithm', reg?.algorithm],
                     ['Target', 'log₁₊(FRP) → MW'],
-                    ['Features', `${data?.feature_columns?.length} engineered`],
-                    ['RMSE', `${info.frp_regressor?.rmse_mw} MW`],
-                    ['MAE', `${info.frp_regressor?.mae_mw} MW`],
-                    ['R² (log)', info.frp_regressor?.r2_log],
-                    ['R² (real)', info.frp_regressor?.r2],
+                    ['Features', data?.feature_columns?.length ? `${data.feature_columns.length} engineered` : '—'],
+                    ['RMSE', reg?.rmse_mw != null ? `${fmtNum(reg.rmse_mw)} MW` : '—'],
+                    ['MAE', reg?.mae_mw != null ? `${fmtNum(reg.mae_mw)} MW` : '—'],
+                    ['R² (log)', fmtNum(reg?.r2_log, 4)],
+                    ['R² (real)', fmtNum(reg?.r2, 4)],
                   ]
                 },
                 {
@@ -306,11 +318,11 @@ export default function MLPage() {
                   icon: Zap,
                   color: '#fbbf24',
                   rows: [
-                    ['Algorithm', info.severity_classifier?.algorithm],
+                    ['Algorithm', clf?.algorithm],
                     ['Classes', '4 (Low/Med/High/Extreme)'],
-                    ['Accuracy', `${(info.severity_classifier?.accuracy * 100).toFixed(1)}%`],
-                    ['Low precision', '91%'],
-                    ['Low recall', '98%'],
+                    ['Accuracy', fmtPct(clf?.accuracy)],
+                    ['F1 (macro)', fmtNum(clf?.f1_macro, 3)],
+                    ['Precision (macro)', fmtNum(clf?.precision_macro, 3)],
                     ['Validation', 'Temporal (2025–2026)'],
                   ]
                 }
@@ -361,7 +373,7 @@ export default function MLPage() {
       <div className="panel p-4 text-[11px] font-mono leading-relaxed"
         style={{ color: '#475569', borderColor: 'rgba(167,139,250,0.12)' }}>
         <span className="text-violet-400 font-semibold">Methodology: </span>
-        Models trained on {info?.n_train?.toLocaleString() ?? '202K'} VIIRS fire pixel records (from {info?.total_records_in_dataset?.toLocaleString() ?? '8.6M'} total archive detections).
+        Models trained on {info?.n_train != null ? fmtInt(info.n_train) : 'a sampled subset of'} VIIRS fire pixel records{info?.total_records_in_dataset != null ? ` (from ${fmtInt(info.total_records_in_dataset)} total archive detections)` : ''}.
         Temporal train/test split: train on 2012–2024, test on 2025–2026.
         Features include brightness temperatures, spatial coordinates, seasonal cyclical encoding, pixel geometry, and confidence level.
         FRP is log₁₊-transformed before training to handle right-skewed distribution.

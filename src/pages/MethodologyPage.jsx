@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import SectionHeader from '../components/ui/SectionHeader';
 import { PanelTitle } from '../components/ui/Shared';
-import { Database, Cpu, ChartBar as BarChart3, Globe, Layers, ArrowRight, CircleCheck as CheckCircle, Clock, Brain, Target, Activity } from 'lucide-react';
+import { Database, Cpu, ChartBar as BarChart3, Globe, Layers, ArrowRight, Clock, Brain, Target, Activity, CircleDot } from 'lucide-react';
 
 const pipeline = [
   {
@@ -10,14 +10,11 @@ const pipeline = [
     icon: Database,
     color: '#22d3ee',
     items: [
-      'Sentinel-5P TROPOMI HCHO L2 product (offline + near-real-time)',
-      'MODIS MOD14/MYD14 Thermal Anomalies & Fire product',
-      'VIIRS VNP14 Active Fire 375m product',
-      'CPCB CAAQMS ground station hourly observations (PM2.5, PM10, NO₂, O₃, CO, SO₂)',
-      'MERRA-2 reanalysis (NASA GMAO) — meteorological fields, 1980–present, 0.5°×0.625° grid',
-      'IMD meteorological reanalysis (wind, humidity, boundary layer height)',
-      'MODIS MOD04 Aerosol Optical Depth (Deep Blue + Dark Target)',
-      'INSAT-3DR Land Surface Temperature',
+      'WAQI — current air quality from monitoring stations (when an API token is set)',
+      'Open-Meteo CAMS — 7-day atmospheric air-quality forecast (PM2.5 and other species)',
+      'NASA FIRMS — active fire detections from MODIS and VIIRS (when an API key is set)',
+      'Bundled reference records — historical AQI, PM2.5 and fire baselines derived from CPCB data',
+      'Sentinel-5P TROPOMI — HCHO column reference geometry for hotspot maps',
     ],
   },
   {
@@ -26,12 +23,10 @@ const pipeline = [
     icon: Layers,
     color: '#a78bfa',
     items: [
-      'HCHO quality flag filtering (qa_value > 0.5) and cloud masking (<30% cloud fraction)',
-      'Fire FRP gridding to 0.1° × 0.1° resolution daily composites',
-      'CPCB outlier removal via IQR-based flagging and spatial cross-validation',
-      'Regridding all datasets to common 1-km resolution grid (WGS84)',
-      'Gap-filling via kriging interpolation for sparse station networks',
-      'Temporal alignment to UTC + IST conversion for multi-source fusion',
+      'Station readings are paired to the selected city using a 100-km search radius; distance is always shown',
+      'AQI values are converted to the standard Indian AQI scale used throughout the app',
+      'Fire FRP (fire radiative power) is computed from satellite brightness temperatures and cleaned for outliers',
+      'Reference records are clearly labelled whenever they stand in for a missing current feed — nothing is invented',
     ],
   },
   {
@@ -40,59 +35,54 @@ const pipeline = [
     icon: Cpu,
     color: '#fbbf24',
     items: [
-      'MODIS AOD + HCHO + FRP spatial lag features (1-km, 5-km, 10-km buffers)',
-      'Fire count and total FRP within 50-km, 100-km, 200-km upwind zones',
-      'HCHO anomaly detection vs 5-year monthly climatology baseline',
-      'Meteorological features: wind speed, direction, PBLH, RH, temperature, precipitation',
-      'Land use / NDVI features from Sentinel-2 seasonal composites',
-      'Temporal features: hour-of-day, day-of-week, month, crop calendar phase',
+      'For fire models: brightness temperature, temp_diff, scan/track geometry, pixel area, day/night flag',
+      'Temporal features: year, month, day-of-year, hour, and sin/cos cyclical encodings',
+      'Spatial features: latitude, longitude, season, region',
+      'FRP target is log₁₊-transformed to handle its right-skewed distribution',
     ],
   },
   {
     step: '04',
-    title: 'AI / ML Modeling — ConvLSTM + Attention',
+    title: 'Machine-Learning Models (in this build)',
     icon: Brain,
     color: '#34d399',
     items: [
-      'ConvLSTM + Attention network for spatiotemporal AQI prediction — captures spatial convolution patterns and temporal recurrence',
-      'Attention mechanism weights multi-satellite features dynamically, focusing on high-impact pixels (fire plumes, HCHO hotspots)',
-      'Inputs: AOD, NO₂, SO₂, CO, O₃, HCHO column, FRP, Temperature, Humidity, Wind, Lat/Lon, Month, Season',
-      'Target: Surface PM2.5 (µg/m³) → converted to AQI via EPA standard breakpoints',
-      'Secondary model: XGBoost ensemble for HCHO anomaly classification (biomass vs biogenic vs industrial)',
-      'Training: 8.6M+ NASA FIRMS fire detections (2012–2026) + CPCB station observations, temporal split',
-      'Validation: 20% held-out CPCB station split · RMSE, MAE, R² reported from real held-out data only',
+      'LightGBM regressor — predicts fire radiative power (MW) from FIRMS VIIRS S-NPP detections (log₁₊ target)',
+      'XGBoost classifier — predicts fire severity class: Low (<10 MW), Medium (10–50), High (50–200), Extreme (>200)',
+      'Training: 202,243 VIIRS detections (2012–2024); test: 125,919 detections (2025–2026) — a temporal split',
+      'Metrics (RMSE, MAE, R², accuracy) are computed on that held-out test period only',
+      'The 7-day AQI forecast shown in the app is the Open-Meteo CAMS atmospheric model — an AQI24-trained AQI model is planned future work, not yet in this build',
     ],
   },
   {
     step: '05',
-    title: 'Spatial Interpolation & Visualization',
+    title: 'Interpolation & Visualization',
     icon: Globe,
     color: '#fb7185',
     items: [
-      'Thin Plate Spline interpolation from station predictions to 1-km AQI grid',
-      'HCHO column density rasterized to GeoJSON hexagonal bins (H3 resolution 5)',
-      'Fire event clustering with DBSCAN for plume source identification',
-      'Leaflet.js interactive map with dynamic tile overlays',
-      'Recharts time series with Framer Motion transitions for dashboard display',
+      'HCHO column density shown as reference hex-bin clusters on the map',
+      'Fire detections rendered as point markers sized by FRP intensity',
+      'Leaflet.js interactive map with multiple tile styles',
+      'Recharts time series and bar charts with Framer Motion transitions',
     ],
   },
 ];
 
 const satellites = [
-  { name: 'Sentinel-5P TROPOMI', agency: 'ESA / Copernicus', param: 'HCHO, NO₂, SO₂, O₃, CO, Aerosol', res: '3.5×5.5 km', revisit: 'Daily ~13:30 LT', color: '#a78bfa' },
-  { name: 'MODIS Terra + Aqua', agency: 'NASA GSFC', param: 'AOD (Deep Blue/DT), Active Fire, LST', res: '1 km / 500 m', revisit: '2× daily', color: '#22d3ee' },
-  { name: 'VIIRS NPP / NOAA-20', agency: 'NASA / NOAA', param: 'VNP14 Active Fire, NOAA VIIRS AF', res: '375 m', revisit: 'Daily', color: '#fbbf24' },
-  { name: 'INSAT-3DR', agency: 'ISRO SAC', param: 'LST, Water Vapour, Cloud Mask', res: '4 km', revisit: '30-min', color: '#34d399' },
-  { name: 'MERRA-2 Reanalysis', agency: 'NASA GMAO', param: 'Meteorology, PBLH, RH, Wind, Temp', res: '0.5°×0.625°', revisit: 'Hourly (1980–present)', color: '#60a5fa' },
+  { name: 'Sentinel-5P TROPOMI', agency: 'ESA / Copernicus', param: 'HCHO, NO₂, SO₂, O₃, CO, Aerosol', res: '3.5×5.5 km', revisit: 'Daily ~13:30 LT', color: '#a78bfa', status: 'Reference', statusColor: '#64748b' },
+  { name: 'MODIS Terra + Aqua', agency: 'NASA GSFC', param: 'AOD (Deep Blue/DT), Active Fire', res: '1 km / 500 m', revisit: '2× daily', color: '#22d3ee', status: 'Live feed', statusColor: '#34d399' },
+  { name: 'VIIRS NPP / NOAA-20', agency: 'NASA / NOAA', param: 'Active Fire 375 m', res: '375 m', revisit: 'Daily', color: '#fbbf24', status: 'Live feed', statusColor: '#34d399' },
+  { name: 'INSAT-3DR', agency: 'ISRO SAC', param: 'LST, Water Vapour, Cloud Mask', res: '4 km', revisit: '30-min', color: '#34d399', status: 'Not in this build', statusColor: '#64748b' },
+  { name: 'MERRA-2 Reanalysis', agency: 'NASA GMAO', param: 'Meteorology, PBLH, RH, Wind, Temp', res: '0.5°×0.625°', revisit: 'Hourly (1980–present)', color: '#60a5fa', status: 'Not in this build', statusColor: '#64748b' },
 ];
 
 export default function MethodologyPage() {
   return (
     <div className="p-4 md:p-6 space-y-6">
       <SectionHeader
-        eyebrow="Scientific Pipeline"
+        eyebrow="Methodology"
         title="Methodology & Data Architecture"
-        description="End-to-end description of data ingestion, preprocessing, ML modeling, and visualization for AQI24."
+        description="How AQI24 turns observed pollution, atmospheric forecasts, satellite fire detections and reference records into the charts and maps you see — with the machine-learning experiments in this build explained plainly."
         accent="cyan"
       />
 
@@ -148,7 +138,7 @@ export default function MethodologyPage() {
         className="panel overflow-hidden"
       >
         <div className="p-5 border-b border-white/5">
-          <PanelTitle title="Satellite Data Sources" subtitle="All missions used in the AQI24 pipeline" />
+          <PanelTitle title="Satellite reference datasets" subtitle="How each mission is used in this build" />
         </div>
         <div className="overflow-x-auto scroll-fade-x">
           <table className="w-full text-xs">
@@ -168,8 +158,10 @@ export default function MethodologyPage() {
                   <td className="py-3 px-4 font-mono text-slate-300">{s.res}</td>
                   <td className="py-3 px-4 font-mono text-slate-300">{s.revisit}</td>
                   <td className="py-3 px-4">
-                    <span className="flex items-center gap-1.5 text-emerald-400 font-mono text-[11px]">
-                      <CheckCircle size={11} aria-hidden="true" /> Active
+                    <span className="flex items-center gap-1.5 font-mono text-[11px]" style={{ color: s.statusColor }}>
+                      {s.status === 'Live feed'
+                        ? <><CircleDot size={11} aria-hidden="true" /> {s.status}</>
+                        : s.status}
                     </span>
                   </td>
                 </tr>
@@ -181,12 +173,16 @@ export default function MethodologyPage() {
 
       {/* Model performance */}
       <div>
-        <div className="text-xs font-mono tracking-widest text-cyan-400 mb-4">MODEL PERFORMANCE</div>
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="text-xs font-mono tracking-widest text-cyan-400 mb-1">FIRE MODEL PERFORMANCE</div>
+        <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>
+          Measured on the held-out 2025–2026 test detections. These models predict fire intensity — the AQI forecast in the app is the Open-Meteo CAMS atmospheric model, not these.
+        </p>
+        <div className="grid md:grid-cols-4 gap-4">
           {[
-            { label: 'RMSE', value: '12.4', sub: 'µg/m³ — root mean squared error on held-out CPCB stations', color: '#22d3ee' },
-            { label: 'MAE', value: '8.7', sub: 'µg/m³ — mean absolute error, PM2.5 prediction', color: '#34d399' },
-            { label: 'R²', value: '0.86', sub: 'Coefficient of determination — ConvLSTM + Attention', color: '#a78bfa' },
+            { label: 'FRP RMSE', value: '6.56', sub: 'MW — LightGBM regressor on held-out test', color: '#22d3ee' },
+            { label: 'FRP MAE', value: '2.23', sub: 'MW — mean absolute error, log-target', color: '#34d399' },
+            { label: 'FRP R² (log)', value: '0.68', sub: 'Coefficient of determination on log₁₊ FRP', color: '#a78bfa' },
+            { label: 'Severity accuracy', value: '89.6%', sub: 'XGBoost classifier, 4 classes', color: '#fbbf24' },
           ].map((m, i) => (
             <motion.div
               key={m.label}
@@ -221,14 +217,14 @@ export default function MethodologyPage() {
       >
         <div className="flex items-center gap-2 mb-4">
           <Target size={16} className="text-emerald-400" aria-hidden="true" />
-          <h3 className="font-semibold text-white text-sm">Training Data Summary</h3>
+          <h3 className="font-semibold text-white text-sm">Fire Model Training Data</h3>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'Fire Detections', value: '8.6M+', sub: 'NASA FIRMS VIIRS (2012–2026)' },
-            { label: 'CPCB Stations', value: '847', sub: 'Ground truth PM2.5/PM10' },
-            { label: 'Temporal Split', value: '80/20', sub: 'Train <2025, Test 2025+' },
-            { label: 'Spatial Grid', value: '1 km', sub: 'India-wide prediction grid' },
+            { label: 'Total archive', value: '8.6M+', sub: 'NASA FIRMS VIIRS detections (2012–2026)' },
+            { label: 'Sampled records', value: '328k', sub: 'Random sample used for training' },
+            { label: 'Train / Test', value: '202k / 126k', sub: 'Temporal split — test 2025–2026' },
+            { label: 'Feature set', value: '20', sub: 'Brightness, geometry, seasonality' },
           ].map((t, i) => (
             <div key={i} className="rounded-xl p-3 text-center" style={{ background: 'rgba(52,211,153,0.05)', border: '1px solid rgba(52,211,153,0.12)' }}>
               <div className="text-xl font-black font-mono text-emerald-400">{t.value}</div>

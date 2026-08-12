@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import { motion, AnimatePresence } from 'motion/react';
 import { getFireColor } from '../../utils/aqiUtils';
 import { MapPanel, MapStyleSwitcher, MapCountBadge, MapCloseButton } from './MapUI';
-import { Globe, Flame, Navigation, Map } from 'lucide-react';
+import { Globe, Flame, Navigation, Map, ChevronDown } from 'lucide-react';
 
 const FIRE_TYPES = ['All', 'Crop Residue', 'Forest Fire', 'Industrial', 'Agricultural'];
 
@@ -133,9 +133,9 @@ function FireMap({ fires = [], selectedYear = 'Live' }) {
 
       {/* Legend */}
       <MapPanel className="absolute bottom-3 left-3 z-[1000] p-3.5 rounded-2xl text-xs w-48">
-        <div className="text-slate-400 font-bold font-mono mb-2 tracking-wide uppercase text-[10px]">Fire Radiative Power</div>
+        <div className="text-slate-400 font-bold font-mono mb-2 tracking-wide uppercase text-[10px]">Fire intensity</div>
         <div className="space-y-1.5 font-mono text-[11px]">
-          {[['Low','<50MW','#fbbf24'],['Medium','50–100MW','#fb923c'],['High','100–200MW','#f87171'],['Extreme','>200MW','#f43f5e']].map(([l,r,c]) => (
+          {[['Mild','<50MW','#fbbf24'],['Moderate','50–100MW','#fb923c'],['High','100–200MW','#f87171'],['Extreme','>200MW','#f43f5e']].map(([l,r,c]) => (
             <div key={l} className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: c }} aria-hidden="true" />
               <span className="text-slate-300">{l}</span>
@@ -152,9 +152,17 @@ function FireMap({ fires = [], selectedYear = 'Live' }) {
             <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full border-2 border-white/40" />Low</span>
           </div>
         </div>
-        <div className="text-slate-600 mt-2 text-[9px] border-t border-white/5 pt-2 font-mono">
-          {selectedYear === 'Live' ? 'Source: NASA FIRMS MODIS/VIIRS' : `Modeled proxy · ${selectedYear}`}
-        </div>
+        <details className="mt-2 pt-2 border-t border-white/5 font-mono">
+          <summary className="cursor-pointer list-none flex items-center justify-between text-slate-500 text-[9px]">
+            <span>Data source</span>
+            <ChevronDown size={11} className="chev-details" aria-hidden="true" />
+          </summary>
+          <div className="text-slate-500 text-[9px] pt-1.5 leading-relaxed">
+            {selectedYear === 'Live'
+              ? 'NASA FIRMS satellite detections (MODIS / VIIRS-SNPP / NOAA-20).'
+              : `Reference records — ${selectedYear}.`}
+          </div>
+        </details>
       </MapPanel>
 
       {/* Count badge */}
@@ -189,7 +197,7 @@ function FireMap({ fires = [], selectedYear = 'Live' }) {
               {selected.confidence && <div className="flex justify-between"><span className="text-slate-500">Confidence</span><span className="text-white font-mono">{selected.confidence}%</span></div>}
               <div className="flex justify-between"><span className="text-slate-500">Source</span><span className="text-white">{selected.source || 'NASA FIRMS'}</span></div>
               {selected.date && <div className="flex justify-between"><span className="text-slate-500">Date</span><span className="text-white font-mono">{selected.date}</span></div>}
-              {selected.isLive && <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-mono"><span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" aria-hidden="true" />Live NASA FIRMS</div>}
+              {selected.isLive && <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-mono"><span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" aria-hidden="true" />Current NASA FIRMS detection</div>}
               {selected.isModeled && <div className="flex items-center gap-1.5 text-[10px] text-amber-400 font-mono"><span className="w-1.5 h-1.5 bg-amber-400 rounded-full" aria-hidden="true" />Modeled estimate</div>}
             </div>
           </motion.div>

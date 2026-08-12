@@ -17,9 +17,9 @@ export default function HCHOPage({ selectedYear = 'Live' }) {
   return (
     <div className="p-4 md:p-6 space-y-6">
       <PageHeader
-        eyebrow={`Tropospheric HCHO — ${selectedYear === 'Live' ? 'Sentinel-5P Reference' : `${selectedYear} Scaled Model`}`}
+        eyebrow={`Tropospheric HCHO — ${selectedYear === 'Live' ? 'Sentinel-5P reference' : `${selectedYear} reference`}`}
         title="Formaldehyde Column Density Hotspots"
-        description="Tropospheric HCHO column density — a proxy for biomass burning, crop residue, and industrial VOC emissions. Retrieved from Sentinel-5P TROPOMI L2 product."
+        description="Tropospheric HCHO column density — a proxy for biomass burning, crop residue, and industrial VOC emissions, retrieved from the Sentinel-5P TROPOMI sensor."
         accent="violet"
       >
         {maxHotspot && (
@@ -57,7 +57,7 @@ export default function HCHOPage({ selectedYear = 'Live' }) {
         {/* Sidebar */}
         <div className="flex flex-col gap-4">
           <div className="panel panel-hover p-5 flex-1">
-            <PanelTitle title="Top Emission Belts" subtitle={selectedYear === 'Live' ? 'Reference · S5P TROPOMI' : `Scaled model · ${selectedYear}`} />
+            <PanelTitle title="Top regions by HCHO" subtitle={selectedYear === 'Live' ? 'Reference · S5P TROPOMI' : `Reference · ${selectedYear}`} />
             {safeHotspots.length === 0 ? (
               <EmptyState title="No hotspots" message={`No HCHO hotspot data for ${selectedYear}`} icon={Activity} />
             ) : (
@@ -95,7 +95,7 @@ export default function HCHOPage({ selectedYear = 'Live' }) {
           </div>
 
           <div className="panel p-5">
-            <PanelTitle title="Science Note" mono={false} />
+            <PanelTitle title="What does HCHO tell us?" mono={false} />
             <p className="text-xs text-slate-400 leading-relaxed mb-2">
               Formaldehyde (HCHO) is a VOC oxidation product used as a proxy for biomass burning and petrochemical activity.
             </p>
@@ -105,7 +105,7 @@ export default function HCHOPage({ selectedYear = 'Live' }) {
           </div>
 
           <div className="panel p-5">
-            <PanelTitle title="Data Pipeline" />
+            <PanelTitle title="About the data" />
             <div className="text-[11px] text-slate-500 font-mono leading-relaxed space-y-1">
               <div>Sensor: Sentinel-5P TROPOMI</div>
               <div>Product: L2 HCHO column</div>

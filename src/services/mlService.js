@@ -4,11 +4,16 @@
  * Loads fire radiative power predictions and model metadata from the
  * FastAPI backend. Falls back to the static bundled JSON if the backend
  * is unreachable, so all pages keep working unchanged.
+ *
+ * When the backend responds but its model metadata is missing/null, the
+ * verified static metadata from public/ml/model_meta.json is used only to
+ * fill those missing fields. Metrics are never fabricated.
  */
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 let _cache = null;
+let _staticMeta = null;
 
 async function fetchJSON(url, timeout = 8000) {
   const controller = new AbortController();
@@ -22,30 +27,63 @@ async function fetchJSON(url, timeout = 8000) {
   }
 }
 
-export async function fetchMLPredictions() {
-  if (_cache) return _cache;
+async function getStaticMeta() {
+  if (_staticMeta) return _staticMeta;
   try {
-    _cache = await fetchJSON(`${API_BASE_URL}/api/v1/ml/predictions`);
-    return _cache;
+    _staticMeta = await fetchJSON('/ml/model_meta.json');
   } catch (err) {
-    try {
-      _cache = await fetchJSON('/ml/predictions.json');
-      return _cache;
-    } catch (fallbackErr) {
-      return { error: fallbackErr.message };
-    }
+    _staticMeta = {};
   }
+  return _staticMeta;
 }
 
-export async function fetchModelMeta() {
+/**
+ * Merge missing/null backend model_info fields with verified static metadata.
+ * Static values are only used when the backend field is absent — never to
+ * overwrite a real backend value.
+ */
+function normalizeInfo(info, fallback) {
+  if (!info || typeof info !== 'object') return fallback || null;
+  const fb = fallback || {};
+  return {
+    ...info,
+    total_records_in_dataset:
+      info.total_records_in_dataset ??
+      info.archive_total ??
+      fb.total_records_in_dataset ??
+      fb.archive_total ??
+      null,
+    frp_regressor: { ...(fb.frp_regressor || {}), ...(info.frp_regressor || {}) },
+    severity_classifier: { ...(fb.severity_classifier || {}), ...(info.severity_classifier || {}) },
+  };
+}
+
+export async function fetchMLPredictions() {
+  if (_cache) return _cache;
+  const fallback = await getStaticMeta();
+
   try {
-    return await fetchJSON(`${API_BASE_URL}/api/v1/ml/model-meta`);
-  } catch (err) {
-    try {
-      return await fetchJSON('/ml/model_meta.json');
-    } catch (fallbackErr) {
-      return { error: fallbackErr.message };
+    const backend = await fetchJSON(`${API_BASE_URL}/api/v1/ml/predictions`);
+    if (backend && Array.isArray(backend.regional_predictions)) {
+      _cache = {
+        ...backend,
+        model_info: normalizeInfo(backend.model_info, fallback),
+      };
+      return _cache;
     }
+  } catch (err) {
+    // Backend unreachable — fall through to static bundle below.
+  }
+
+  try {
+    const staticData = await fetchJSON('/ml/predictions.json');
+    _cache = {
+      ...staticData,
+      model_info: normalizeInfo(staticData.model_info, fallback),
+    };
+    return _cache;
+  } catch (fallbackErr) {
+    return { error: fallbackErr.message };
   }
 }
 

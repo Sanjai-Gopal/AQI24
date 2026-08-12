@@ -1,15 +1,16 @@
 import { memo } from 'react';
 import { motion } from 'motion/react';
 
-function SectionHeader({ eyebrow, title, description, accent = 'cyan' }) {
+function SectionHeader({ eyebrow, title, description, accent = 'sky' }) {
   const colors = {
-    cyan: '#22d3ee',
-    amber: '#fbbf24',
-    rose: '#fb7185',
-    emerald: '#34d399',
-    violet: '#a78bfa',
+    sky: '#0d86de',
+    cyan: '#0d86de',
+    amber: '#c77f16',
+    rose: '#e0526f',
+    emerald: '#12a85c',
+    violet: '#8b5cf6',
   };
-  const color = colors[accent] || colors.cyan;
+  const color = colors[accent] || colors.sky;
 
   return (
     <motion.div
@@ -21,11 +22,11 @@ function SectionHeader({ eyebrow, title, description, accent = 'cyan' }) {
       {eyebrow && (
         <div className="flex items-center gap-2 mb-3">
           <div className="h-px w-8" style={{ background: color }} aria-hidden="true" />
-          <span className="text-xs font-mono tracking-widest uppercase" style={{ color }}>{eyebrow}</span>
+          <span className="text-xs font-semibold tracking-[0.14em] uppercase" style={{ color }}>{eyebrow}</span>
         </div>
       )}
-      <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">{title}</h2>
-      {description && <p className="text-slate-400 mt-2 text-sm leading-relaxed max-w-2xl">{description}</p>}
+      <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ color: 'var(--text-main)' }}>{title}</h2>
+      {description && <p className="mt-2 text-sm leading-relaxed max-w-2xl" style={{ color: 'var(--text-muted)' }}>{description}</p>}
     </motion.div>
   );
 }

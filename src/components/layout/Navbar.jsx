@@ -1,40 +1,48 @@
 import { useEffect, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Satellite, Menu, X, Activity, Wind, Flame, ChartBar as BarChart3, BookOpen, Users, LayoutDashboard, Sun, Moon, History, Brain } from 'lucide-react';
+import { Menu, X, Home, CloudSun, History, Map as MapIcon, FlaskConical, Sun, Moon, User, MapPin, LogIn, LogOut, Sparkles } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const navItems = [
-  { label: 'Dashboard', icon: LayoutDashboard, key: 'dashboard' },
-  { label: 'AQI Map', icon: Wind, key: 'aqimap' },
-  { label: 'Forecast', icon: Brain, key: 'forecast' },
-  { label: 'HCHO', icon: Activity, key: 'hcho' },
-  { label: 'Fire', icon: Flame, key: 'fire' },
-  { label: 'Analytics', icon: BarChart3, key: 'analytics' },
-  { label: 'Historical', icon: History, key: 'historical' },
-  { label: 'ML Model', icon: Brain, key: 'ml' },
-  { label: 'Methodology', icon: BookOpen, key: 'methodology' },
-  { label: 'About', icon: Users, key: 'about' },
+  { label: 'Home', to: '/', icon: Home },
+  { label: 'Forecast', to: '/forecast', icon: CloudSun },
+  { label: 'History', to: '/history', icon: History },
+  { label: 'Map', to: '/map', icon: MapIcon },
+  { label: 'Research', to: '/research', icon: FlaskConical },
 ];
 
-export default function Navbar({ activeSection, onNav, theme, onToggleTheme, overlay = false }) {
+const accountItems = [
+  { label: 'My Locations', to: '/my-locations', icon: MapPin },
+  { label: 'Profile', to: '/profile', icon: User },
+];
+
+export default function Navbar({ theme, onToggleTheme }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
+  const { isAuthenticated, configured, signOut } = useAuth();
 
-  // On the landing page the nav floats over the hero: transparent until the
-  // user scrolls, then it frosts over for legibility.
   useEffect(() => {
-    if (!overlay) { setScrolled(true); return; }
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => setScrolled(window.scrollY > 16);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, [overlay]);
+  }, []);
 
-  const frosted = overlay ? scrolled : true;
+  const frosted = scrolled;
+
+  const close = () => setMobileOpen(false);
+
+  const goAndClose = (to) => {
+    close();
+    navigate(to);
+  };
 
   return (
     <nav
       aria-label="Primary"
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${overlay ? '' : 'shadow-[0_1px_0_0_var(--panel-border)]'}`}
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
         background: frosted ? 'var(--nav-bg)' : 'transparent',
         backdropFilter: frosted ? 'blur(16px)' : 'none',
@@ -44,77 +52,112 @@ export default function Navbar({ activeSection, onNav, theme, onToggleTheme, ove
     >
       <div className="max-w-screen-2xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Logo */}
-        <motion.button
-          type="button"
-          className="flex items-center gap-3 cursor-pointer"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          onClick={() => onNav('landing')}
+        <NavLink
+          to="/"
+          className="flex items-center gap-2.5 cursor-pointer group"
           aria-label="AQI24 home"
         >
           <div className="relative">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, rgba(34,211,238,0.1), rgba(8,145,178,0.1))', border: '1px solid var(--panel-border)' }}>
-              <Satellite size={16} className="text-cyan-400" aria-hidden="true" />
+            <div
+              className="w-9 h-9 rounded-full flex items-center justify-center transition-all group-hover:scale-105 shadow-sm"
+              style={{ background: 'linear-gradient(135deg, rgba(13,134,222,0.14), rgba(59,130,246,0.10))', border: '1px solid var(--panel-border)' }}
+            >
+              <Sparkles size={16} className="text-sky-500" aria-hidden="true" />
             </div>
-            <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-400 rounded-full animate-pulse" aria-hidden="true" />
           </div>
           <div>
-            <div className="text-white font-semibold text-sm leading-none tracking-wide">AQI<span className="text-cyan-400">24</span></div>
-            <div className="text-slate-500 text-xs font-mono leading-none mt-0.5">AIR · IQ</div>
+            <div className="font-semibold text-sm leading-none tracking-wide" style={{ color: 'var(--text-main)' }}>
+              AQI<span className="text-sky-500">24</span>
+            </div>
+            <div className="text-[10px] leading-none mt-1" style={{ color: 'var(--text-faint)' }}>Know tomorrow</div>
           </div>
-        </motion.button>
+        </NavLink>
 
-        {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center gap-0.5">
-          {navItems.map((item, i) => {
+        {/* Desktop nav */}
+        <div className="hidden lg:flex items-center gap-1">
+          {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activeSection === item.key;
             return (
-              <motion.button
-                key={item.key}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.03 }}
-                onClick={() => onNav(item.key)}
-                aria-current={isActive ? 'page' : undefined}
-                className={`nav-link group relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all ${
-                  isActive ? 'text-cyan-400 bg-cyan-400/10 border border-cyan-400/25' : 'text-slate-400 hover:text-cyan-400 hover:bg-cyan-400/5 border border-transparent'
-                }`}
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === '/'}
+                className={({ isActive }) =>
+                  `nav-link relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+                    isActive
+                      ? 'text-sky-600 bg-sky-500/10 border border-sky-500/25'
+                      : 'text-slate-500 hover:text-sky-600 hover:bg-sky-500/5 border border-transparent'
+                  }`
+                }
               >
                 <Icon size={12} aria-hidden="true" />
                 {item.label}
                 <span className="nav-underline" aria-hidden="true" />
-              </motion.button>
+              </NavLink>
             );
           })}
         </div>
 
         {/* Right cluster */}
-        <div className="hidden lg:flex items-center gap-3">
-          <button onClick={onToggleTheme}
-            aria-label={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
-            className="p-1.5 rounded-lg border cursor-pointer transition-all flex items-center justify-center text-cyan-400 hover:text-cyan-300 bg-cyan-400/10 hover:bg-cyan-400/20"
-            style={{ borderColor: 'var(--panel-border)' }}>
+        <div className="hidden lg:flex items-center gap-2">
+          <button
+            onClick={onToggleTheme}
+            aria-label={theme === 'light' ? 'Switch to night theme' : 'Switch to day theme'}
+            className="p-2 rounded-lg border cursor-pointer transition-all flex items-center justify-center text-sky-600 hover:text-sky-700 bg-sky-500/10 hover:bg-sky-500/20"
+            style={{ borderColor: 'var(--panel-border)' }}
+          >
             {theme === 'light' ? <Moon size={14} aria-hidden="true" /> : <Sun size={14} aria-hidden="true" />}
           </button>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)' }}>
-            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" aria-hidden="true" />
-            <span className="text-emerald-400 text-xs font-mono">LIVE</span>
-          </div>
+
+          {isAuthenticated ? (
+            <div className="flex items-center gap-1">
+              {accountItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    className={({ isActive }) =>
+                      `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                        isActive ? 'text-emerald-600 bg-emerald-500/10' : 'text-slate-500 hover:text-sky-600 hover:bg-sky-500/5'
+                      }`
+                    }
+                  >
+                    <Icon size={12} aria-hidden="true" />
+                    {item.label}
+                  </NavLink>
+                );
+              })}
+            </div>
+          ) : (
+            <NavLink
+              to="/login"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-white bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-500 transition-all shadow-md"
+            >
+              <LogIn size={12} aria-hidden="true" />
+              Sign in
+            </NavLink>
+          )}
+
+          {configured && !isAuthenticated && (
+            <span className="sr-only">Sign in for saved locations and downloads</span>
+          )}
         </div>
 
         {/* Mobile controls */}
         <div className="flex items-center gap-2 lg:hidden">
-          <button onClick={onToggleTheme}
-            aria-label={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
-            className="p-1.5 rounded-lg border cursor-pointer transition-all flex items-center justify-center text-cyan-400 bg-cyan-400/10"
-            style={{ borderColor: 'var(--panel-border)' }}>
+          <button
+            onClick={onToggleTheme}
+            aria-label={theme === 'light' ? 'Switch to night theme' : 'Switch to day theme'}
+            className="p-2 rounded-lg border cursor-pointer transition-all flex items-center justify-center text-sky-600 bg-sky-500/10"
+            style={{ borderColor: 'var(--panel-border)' }}
+          >
             {theme === 'light' ? <Moon size={14} aria-hidden="true" /> : <Sun size={14} aria-hidden="true" />}
           </button>
           <button
-            className="text-slate-400 hover:text-white cursor-pointer p-1"
-            onClick={() => setMobileOpen(!mobileOpen)}
+            className="p-1 cursor-pointer"
+            style={{ color: 'var(--text-sub)' }}
+            onClick={() => setMobileOpen(o => !o)}
             aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav-menu"
@@ -135,24 +178,56 @@ export default function Navbar({ activeSection, onNav, theme, onToggleTheme, ove
             style={{ background: 'var(--nav-bg)', borderBottom: '1px solid var(--panel-border)' }}
             className="lg:hidden overflow-hidden"
           >
-            <div className="px-4 py-2 grid grid-cols-2 gap-1.5 pb-4">
+            <div className="px-4 py-3 space-y-1 pb-5">
               {navItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = activeSection === item.key;
                 return (
                   <button
-                    key={item.key}
-                    onClick={() => { onNav(item.key); setMobileOpen(false); }}
-                    aria-current={isActive ? 'page' : undefined}
-                    className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all text-left ${
-                      isActive ? 'text-cyan-400 bg-cyan-400/10' : 'text-slate-400 hover:text-white hover:bg-white/5'
-                    }`}
+                    key={item.to}
+                    onClick={() => goAndClose(item.to)}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all text-left"
+                    style={{ color: 'var(--text-sub)' }}
                   >
-                    <Icon size={14} className="text-cyan-400" aria-hidden="true" />
+                    <Icon size={14} className="text-sky-500" aria-hidden="true" />
                     {item.label}
                   </button>
                 );
               })}
+              <div className="my-2" style={{ borderTop: '1px solid var(--panel-border)' }} />
+              {isAuthenticated ? (
+                <>
+                  {accountItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.to}
+                        onClick={() => goAndClose(item.to)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all text-left"
+                        style={{ color: 'var(--text-sub)' }}
+                      >
+                        <Icon size={14} className="text-emerald-500" aria-hidden="true" />
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                  <button
+                    onClick={() => { close(); signOut(); navigate('/'); }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all text-left"
+                    style={{ color: 'var(--text-sub)' }}
+                  >
+                    <LogOut size={14} className="text-rose-500" aria-hidden="true" />
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => goAndClose('/login')}
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-sky-500 to-sky-600 transition-all"
+                >
+                  <LogIn size={14} aria-hidden="true" />
+                  Sign in
+                </button>
+              )}
             </div>
           </motion.div>
         )}

@@ -36,9 +36,9 @@ export default function AnalyticsPage({ selectedYear = 'Live' }) {
   return (
     <div className="p-4 md:p-6 space-y-6">
       <SectionHeader
-        eyebrow={`Deep Analytical Mining — ${selectedYear}`}
+        eyebrow={`Trends & Analysis — ${selectedYear}`}
         title="Trends & Correlations"
-        description={`Multi-temporal analysis correlating AQI, HCHO column density, and active fires across Indian subregions for ${selectedYear}.`}
+        description={`Seasonal reference series for AQI, HCHO column density, and active fires across Indian subregions for ${selectedYear}.`}
         accent="emerald"
       />
 
@@ -60,7 +60,7 @@ export default function AnalyticsPage({ selectedYear = 'Live' }) {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="panel panel-hover p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <PanelTitle title="HCHO Columns vs Active Fires" subtitle="Biomass VOC vs Thermal Radiative Power correlation" />
+              <PanelTitle title="HCHO Columns vs Active Fires" subtitle="HCHO column density vs fire counts by month" />
               <ChartExportButtons chartRef={hchoRef} filename={`aqi24-trends-hcho-fires`} />
             </div>
             <div ref={hchoRef} role="img" aria-label={`Dual-axis chart comparing HCHO column density and active fire counts by month in ${selectedYear}`}>
@@ -91,16 +91,16 @@ export default function AnalyticsPage({ selectedYear = 'Live' }) {
       )}
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="panel p-5">
-        <PanelTitle title="Key Analytical Insights" subtitle={`Derived from multi-sensor correlation analysis · ${selectedYear}`} />
+        <PanelTitle title="Key insights" subtitle={`Seasonal reference observations · ${selectedYear}`} />
         <div className="grid md:grid-cols-3 gap-4">
           {[
             {
-              title: 'HCHO–Fire Correlation',
-              value: parseInt(selectedYear) <= 1995 ? 'r² = 0.52' : 'r² = 0.87',
+              title: 'HCHO–Fire pattern',
+              value: parseInt(selectedYear) <= 1995 ? 'Localised' : 'Oct–Nov peak',
               color: '#22d3ee',
               desc: parseInt(selectedYear) <= 1995
-                ? 'Lower agricultural mechanization yields localized biomass patterns with minimal regional transport.'
-                : 'Stubble-clearing cycles in NW India drive HCHO spikes that scale with satellite thermal registers.',
+                ? 'Earlier years show a localised biomass pattern with limited regional spread in the reference series.'
+                : 'The reference series shows HCHO and fire activity rising together in Oct–Nov over NW India — consistent with stubble-clearing season.',
             },
             {
               title: 'Particulate Transport',
@@ -112,10 +112,10 @@ export default function AnalyticsPage({ selectedYear = 'Live' }) {
             },
             {
               title: 'Data Source',
-              value: selectedYear === 'Live' ? 'WAQI Live' : 'Modeled',
+              value: selectedYear === 'Live' ? 'Current readings' : 'Reference records',
               color: selectedYear === 'Live' ? '#34d399' : '#fbbf24',
               desc: selectedYear === 'Live'
-                ? 'Real-time WAQI station network. Open-Meteo CAMS for forecasts. NASA FIRMS for fire data.'
+                ? 'WAQI station network for current readings. Open-Meteo CAMS for forecasts. NASA FIRMS for fire data.'
                 : `Interpolated from CPCB annual reports and NCAP targets. Multiplier: ${((parseInt(selectedYear) <= 2020 ? 0.65 : 1.0))}×`,
             },
           ].map((ins, i) => (

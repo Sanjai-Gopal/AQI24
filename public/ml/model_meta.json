@@ -6,6 +6,7 @@
   "n_test": 125919,
   "total_sampled": 328162,
   "archive_total": 8627741,
+  "total_records_in_dataset": 8627741,
   "date_range": [
     "2012-01-20",
     "2026-06-23"

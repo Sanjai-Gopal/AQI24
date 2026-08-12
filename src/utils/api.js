@@ -23,6 +23,18 @@ function setCache(key, data, ttl = CACHE_TTL) {
   cache.set(key, { data, ts: Date.now(), ttl });
 }
 
+// ─── Great-circle distance (km) between two coordinates ─────────────────────
+function haversineKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
 // ─── Fetch with retry + exponential backoff ────────────────────────────────
 async function fetchWithRetry(url, options = {}, retries = 3, baseDelay = 500) {
   for (let attempt = 0; attempt < retries; attempt++) {
@@ -56,6 +68,18 @@ export async function fetchLiveAQIForCity(cityName, lat, lng) {
       return { error: json.data || 'No data from WAQI' };
     }
     const d = json.data;
+
+    // WAQI's geo feed can snap to the nearest station even when it is very far
+    // away (e.g. a Delhi station for a city in Tamil Nadu). A reading from a
+    // station hundreds of kilometres away is not a "current reading" for this
+    // city, so reject it rather than show a misleading number.
+    const stationGeo = Array.isArray(d.city?.geo) ? d.city.geo : null;
+    if (stationGeo?.length === 2 && !isNaN(stationGeo[0]) && !isNaN(stationGeo[1])) {
+      const distKm = haversineKm(lat, lng, stationGeo[0], stationGeo[1]);
+      if (distKm > 120) {
+        return { error: `Nearest station is ${Math.round(distKm)} km away` };
+      }
+    }
     const pm25raw = d.iaqi?.pm25?.v ?? null;
     const result = {
       aqi: d.aqi,
@@ -212,22 +236,34 @@ function getIndianState(lat, lng) {
   return 'India';
 }
 
-// ─── Open-Meteo: 7-day AQI forecast (free, no key) ────────────────────────
+// ─── Open-Meteo: 7-day AQI + weather forecast (free, no key) ──────────────
+// Air quality comes from the CAMS global model; weather (condition code,
+// temperature, rain chance) comes from the Open-Meteo forecast model. Both
+// are real model output — never invented.
 export async function fetchForecast(lat, lng, cityName = '') {
   const key = `forecast_${lat}_${lng}`;
   const cached = getCached(key);
   if (cached) return cached;
 
   try {
-    const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lng}&hourly=pm2_5,pm10,nitrogen_dioxide,ozone,carbon_monoxide,sulphur_dioxide&forecast_days=7&timezone=Asia%2FKolkata`;
-    const json = await fetchWithRetry(url, { timeout: 8000 });
+    const [aqJson, wxJson] = await Promise.all([
+      fetchWithRetry(
+        `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lng}&hourly=pm2_5,pm10,nitrogen_dioxide,ozone,carbon_monoxide,sulphur_dioxide&forecast_days=7&timezone=Asia%2FKolkata`,
+        { timeout: 8000 }
+      ),
+      fetchWithRetry(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=7&timezone=Asia%2FKolkata`,
+        { timeout: 8000 }
+      ).catch(() => null),
+    ]);
 
-    if (!json.hourly?.pm2_5) throw new Error('No forecast data');
+    if (!aqJson.hourly?.pm2_5) throw new Error('No forecast data');
 
-    const hours = json.hourly.time;
+    const hours = aqJson.hourly.time;
+    const wxDaily = wxJson?.daily ?? {};
     const daily = [];
     for (let d = 0; d < 7; d++) {
-      const slice = json.hourly.pm2_5.slice(d * 24, (d + 1) * 24).filter(v => v != null);
+      const slice = aqJson.hourly.pm2_5.slice(d * 24, (d + 1) * 24).filter(v => v != null);
       if (!slice.length) continue;
       const avgPm25 = slice.reduce((a, v) => a + v, 0) / slice.length;
       const aqi = pm25ToAQI(avgPm25) ?? Math.round(avgPm25 * 4.2);
@@ -236,13 +272,17 @@ export async function fetchForecast(lat, lng, cityName = '') {
         aqi,
         pm25: Math.round(avgPm25 * 10) / 10,
         pm10: (() => {
-          const s = json.hourly.pm10.slice(d*24,(d+1)*24).filter(v=>v!=null);
+          const s = aqJson.hourly.pm10.slice(d*24,(d+1)*24).filter(v=>v!=null);
           return s.length ? Math.round(s.reduce((a,v)=>a+v,0)/s.length*10)/10 : null;
         })(),
         no2: (() => {
-          const s = json.hourly.nitrogen_dioxide.slice(d*24,(d+1)*24).filter(v=>v!=null);
+          const s = aqJson.hourly.nitrogen_dioxide.slice(d*24,(d+1)*24).filter(v=>v!=null);
           return s.length ? Math.round(s.reduce((a,v)=>a+v,0)/s.length*10)/10 : null;
         })(),
+        weatherCode: wxDaily.weather_code?.[d] ?? null,
+        tempMax: wxDaily.temperature_2m_max?.[d] != null ? Math.round(wxDaily.temperature_2m_max[d]) : null,
+        tempMin: wxDaily.temperature_2m_min?.[d] != null ? Math.round(wxDaily.temperature_2m_min[d]) : null,
+        precipProb: wxDaily.precipitation_probability_max?.[d] != null ? Math.round(wxDaily.precipitation_probability_max[d]) : null,
         source: 'Open-Meteo',
         city: cityName,
       });

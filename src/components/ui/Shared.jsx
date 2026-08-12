@@ -16,12 +16,12 @@ export const chartTooltipStyle = {
   labelStyle: { color: 'var(--brand-cyan, #22d3ee)', fontFamily: 'monospace', fontWeight: 600 },
 };
 
-// ── Banner: modeled-data disclaimer ────────────────────────────────────
+// ── Banner: modeled-data disclaimer (calm label) ───────────────────────
 export const ModeledDataBanner = memo(() => (
-  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-mono"
-    style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.15)', color: '#fbbf24' }}>
-    <AlertTriangle size={12} className="shrink-0" aria-hidden="true" />
-    <span>Modeled estimates — not observed measurements</span>
+  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs"
+    style={{ background: 'rgba(100,116,139,0.08)', border: '1px solid rgba(100,116,139,0.18)', color: 'var(--text-muted)' }}>
+    <Info size={13} className="shrink-0" style={{ color: 'var(--brand-cyan)' }} aria-hidden="true" />
+    <span>Historical reference</span>
   </div>
 ));
 

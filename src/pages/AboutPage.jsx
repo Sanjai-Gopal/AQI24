@@ -1,21 +1,22 @@
 import { motion } from 'motion/react';
+import { Link } from 'react-router-dom';
 import SectionHeader from '../components/ui/SectionHeader';
-import { GitBranch, Satellite, Award, Target, ArrowRight, Database, Cpu, Globe, Layers, Brain, Rocket, Heart } from 'lucide-react';
+import { GitBranch, Satellite, Award, Target, ArrowRight, Database, Cpu, Globe, Layers, Brain, Rocket, Heart, CloudSun } from 'lucide-react';
 
 const team = [
-  { name: 'Lead ML Engineer', role: 'ConvLSTM + Attention architecture, model training & hyperparameter optimization, MERRA-2 integration', color: '#34d399' },
-  { name: 'Frontend Developer', role: 'React + Vite + Leaflet + Recharts dashboard, data visualization, UX/UI design', color: '#22d3ee' },
-  { name: 'Remote Sensing Specialist', role: 'Sentinel-5P TROPOMI processing, MODIS/VIIRS fire data pipeline, HCHO retrieval', color: '#fbbf24' },
-  { name: 'Data Engineer', role: 'CPCB + IMD data fusion, preprocessing pipeline, spatial interpolation (TPS/kriging)', color: '#a78bfa' },
-  { name: 'Backend / DevOps Engineer', role: 'FastAPI inference server, Docker containerization, CI/CD pipeline, NVIDIA NIM integration', color: '#fb7185' },
+  { name: 'Frontend Developer', role: 'React + Vite + Tailwind dashboard, Leaflet maps, Recharts visualizations, UX/UI design', color: '#22d3ee' },
+  { name: 'ML Engineer', role: 'Fire intensity regressor and severity classifier experiments (LightGBM, XGBoost) on NASA FIRMS data', color: '#34d399' },
+  { name: 'Remote Sensing Specialist', role: 'NASA FIRMS fire integration, Sentinel-5P TROPOMI HCHO reference maps', color: '#fbbf24' },
+  { name: 'Data Engineer', role: 'WAQI + Open-Meteo CAMS integration, reference record curation, AQI scale handling', color: '#a78bfa' },
+  { name: 'Backend / DevOps Engineer', role: 'Optional FastAPI inference server, Supabase auth, deployment', color: '#fb7185' },
 ];
 
-// Architecture diagram nodes
+// Architecture diagram nodes — how this build actually works
 const ARCH_FLOW = [
-  { title: 'Satellite Sources', icon: Satellite, color: '#22d3ee', items: ['Sentinel-5P TROPOMI', 'MODIS Terra/Aqua', 'VIIRS S-NPP', 'INSAT-3DR'] },
-  { title: 'Ground Data', icon: Database, color: '#34d399', items: ['CPCB CAAQMS', 'IMD Reanalysis', '847 stations'] },
-  { title: 'Processing', icon: Layers, color: '#a78bfa', items: ['GEE Exports', 'Spatial Join', 'Feature Engineering'] },
-  { title: 'ML Models', icon: Cpu, color: '#fbbf24', items: ['ConvLSTM + Attention', 'XGBoost HCHO Classifier', 'LSTM Forecast'] },
+  { title: 'Data Sources', icon: Database, color: '#22d3ee', items: ['WAQI stations', 'Open-Meteo CAMS', 'NASA FIRMS', 'Reference records'] },
+  { title: 'Processing', icon: Layers, color: '#34d399', items: ['AQI scale conversion', 'Station pairing (100 km)', 'FRP features', 'Log₁₊ transform'] },
+  { title: 'ML Experiments', icon: Cpu, color: '#fbbf24', items: ['LightGBM FRP regressor', 'XGBoost severity classifier'] },
+  { title: 'Forecast', icon: CloudSun, color: '#a78bfa', items: ['CAMS atmospheric model', '7-day outlook'] },
   { title: 'Visualization', icon: Globe, color: '#fb7185', items: ['React Dashboard', 'Leaflet Maps', 'Recharts'] },
 ];
 
@@ -25,7 +26,7 @@ export default function AboutPage() {
       <SectionHeader
         eyebrow="About This Project"
         title="AQI24 — Air Quality Intelligence"
-        description="Surface AQI & HCHO Hotspot Identification using Satellite Data"
+        description="Current air quality, forecasts and satellite-derived fire activity for every city in India — built on verifiable, clearly-labelled data."
         accent="cyan"
       />
 
@@ -34,31 +35,28 @@ export default function AboutPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="panel p-6">
           <div className="flex items-center gap-3 mb-4">
             <Target size={20} className="text-cyan-400" aria-hidden="true" />
-            <h3 className="font-semibold text-white">Problem Statement</h3>
+            <h3 className="font-semibold text-white">Why AQI24 exists</h3>
           </div>
           <p className="text-slate-400 text-sm leading-relaxed mb-4">
-            India faces a severe air quality crisis, with over 1.4 billion people exposed to pollution levels exceeding WHO guidelines.
-            Traditional ground-based monitoring covers only ~850 locations — leaving vast rural regions unmonitored.
+            Air pollution affects hundreds of millions of people in India, yet ground monitoring stations cover only a few hundred locations.
           </p>
           <p className="text-slate-400 text-sm leading-relaxed">
-            AQI24 addresses this gap by fusing multi-sensor satellite observations with CPCB ground data
-            and AI models to generate nationwide 1-km AQI grids and identify biomass-burning-linked HCHO hotspots
-            in near real time.
+            AQI24 pairs nearby station readings with an atmospheric forecast and satellite-derived fire activity, so anyone can check the air quality around them — and understand where the numbers come from.
           </p>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="panel p-6">
           <div className="flex items-center gap-3 mb-4">
             <Award size={20} className="text-amber-400" aria-hidden="true" />
-            <h3 className="font-semibold text-white">Innovation Highlights</h3>
+            <h3 className="font-semibold text-white">What&rsquo;s in this build</h3>
           </div>
           <div className="space-y-3">
             {[
-              { title: 'Multi-sensor Fusion', desc: 'First integration of Sentinel-5P HCHO + MODIS AOD + VIIRS fire + CPCB ground for India-wide AQI', color: '#22d3ee' },
-              { title: 'ConvLSTM + Attention', desc: 'Spatiotemporal deep learning model capturing spatial convolution patterns and temporal recurrence with multi-satellite attention weighting', color: '#34d399' },
-              { title: 'HCHO Source Attribution', desc: 'ML-based source separation distinguishing biomass burning from biogenic and industrial HCHO', color: '#a78bfa' },
-              { title: 'Temporal Forecasting', desc: 'LSTM 6-hour ahead AQI predictions enabling early warning for sensitive populations', color: '#fbbf24' },
-              { title: 'Open Data Stack', desc: 'Entirely built on freely available Copernicus, NASA EARTHDATA, and CPCB open datasets', color: '#fb7185' },
+              { title: 'Current readings', desc: 'Nearest-station AQI from WAQI, with the station name and distance always shown', color: '#22d3ee' },
+              { title: '7-day forecast', desc: 'Air quality outlook from the Open-Meteo CAMS atmospheric model, clearly labelled as a forecast', color: '#34d399' },
+              { title: 'Fire activity', desc: 'Satellite fire detections from NASA FIRMS with fire intensity, not a severity judgement', color: '#fbbf24' },
+              { title: 'Reference records', desc: 'Historical charts are labelled as modelled references whenever they are not current measurements', color: '#a78bfa' },
+              { title: 'ML experiments', desc: 'A fire-intensity regressor and severity classifier trained on NASA FIRMS detections — clearly scoped as experiments', color: '#fb7185' },
             ].map((item) => (
               <div key={item.title} className="flex items-start gap-2 text-sm">
                 <div className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style={{ background: item.color }} />
@@ -143,23 +141,21 @@ export default function AboutPage() {
         </div>
       </div>
 
-      {/* Future Scope — NVIDIA NIM */}
+      {/* Planned next steps */}
       <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="panel p-6"
         style={{ borderColor: 'rgba(52,211,153,0.15)', background: 'rgba(52,211,153,0.03)' }}>
         <div className="flex items-center gap-3 mb-4">
           <Rocket size={20} className="text-emerald-400" aria-hidden="true" />
-          <h3 className="font-semibold text-white">Future Scope: NVIDIA NIM Integration</h3>
+          <h3 className="font-semibold text-white">Planned next steps</h3>
         </div>
         <p className="text-slate-400 text-sm leading-relaxed mb-4">
-          The next evolution of AQI24 targets deployment of the ConvLSTM + Attention model as an NVIDIA NIM (NVIDIA Inference Microservice) container.
-          This enables GPU-accelerated inference for real-time, nationwide 1-km AQI prediction at scale — reducing latency from minutes to seconds
-          and supporting operational deployment for government environmental agencies.
+          The 7-day outlook today comes from the Open-Meteo CAMS atmospheric model. We plan to train AQI24&rsquo;s own AQI forecasting model, served from a Python backend, and to explore GPU-accelerated inference for larger-scale deployment.
         </p>
         <div className="grid md:grid-cols-3 gap-3">
           {[
-            { title: 'GPU-Accelerated Inference', desc: 'NVIDIA TensorRT optimization for ConvLSTM + Attention model serving', icon: Cpu, color: '#34d399' },
-            { title: 'Scalable Microservice', desc: 'NIM container orchestration with Kubernetes for auto-scaling demand spikes', icon: Layers, color: '#22d3ee' },
-            { title: 'Real-Time API', desc: 'Sub-second AQI prediction API for integration with public alert systems', icon: Rocket, color: '#fbbf24' },
+            { title: 'AQI forecasting model', desc: 'Train an AQI24 model on CPCB station readings to complement the CAMS forecast', icon: Brain, color: '#34d399' },
+            { title: 'Python inference backend', desc: 'FastAPI service that loads trained models and serves predictions to the dashboard', icon: Cpu, color: '#22d3ee' },
+            { title: 'Operational deployment', desc: 'Containers and orchestration to run larger-scale inference if needed', icon: Layers, color: '#fbbf24' },
           ].map((item) => {
             const Icon = item.icon;
             return (
@@ -181,9 +177,9 @@ export default function AboutPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { cat: 'Frontend', items: ['React 19 + Vite', 'Tailwind CSS v4', 'Framer Motion', 'Leaflet + React-Leaflet', 'Recharts'] },
-            { cat: 'ML / Backend', items: ['Python 3.11', 'ConvLSTM + Attention (PyTorch)', 'XGBoost HCHO Classifier', 'FastAPI', 'NumPy / PandPy'] },
-            { cat: 'Remote Sensing', items: ['ESA SNAP / Sentinelsat', 'NASA EarthData', 'GDAL / Rasterio', 'Google Earth Engine', 'netCDF4 / HDF5'] },
-            { cat: 'Infrastructure', items: ['Docker', 'GeoServer', 'PostgreSQL + PostGIS', 'AWS S3 (data lake)', 'GitHub Actions CI'] },
+            { cat: 'ML Experiments', items: ['Python 3.11', 'LightGBM FRP Regressor', 'XGBoost Classifier', 'scikit-learn'] },
+            { cat: 'Data Sources', items: ['WAQI API', 'Open-Meteo CAMS', 'NASA FIRMS', 'Sentinel-5P TROPOMI reference'] },
+            { cat: 'Infrastructure', items: ['Vite static build', 'Optional FastAPI backend', 'Supabase auth', 'GitHub Actions CI'] },
           ].map((stack) => (
             <div key={stack.cat} className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.02)' }}>
               <div className="text-xs font-mono text-cyan-400 mb-2">{stack.cat}</div>
@@ -196,15 +192,15 @@ export default function AboutPage() {
       </motion.div>
 
       {/* Links */}
-      <div className="flex items-center gap-3">
-        <a href="#" className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-slate-300 transition-all hover:text-white border border-slate-700/50 bg-slate-800/30 hover:bg-slate-800/50">
-          <GitBranch size={16} />
-          Source Code
-        </a>
-        <a href="#" className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-slate-300 transition-all hover:text-white border border-slate-700/50 bg-slate-800/30 hover:bg-slate-800/50">
+      <div className="flex items-center gap-3 flex-wrap">
+        <Link to="/research" className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-slate-300 transition-all hover:text-white border border-slate-700/50 bg-slate-800/30 hover:bg-slate-800/50">
+          <GitBranch size={16} aria-hidden="true" />
+          Research &amp; Data
+        </Link>
+        <Link to="/research/indicators" className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-slate-300 transition-all hover:text-white border border-slate-700/50 bg-slate-800/30 hover:bg-slate-800/50">
           <Satellite size={16} className="text-cyan-400" aria-hidden="true" />
-          Project Overview
-        </a>
+          Air quality indicators
+        </Link>
       </div>
 
       {/* Footer */}

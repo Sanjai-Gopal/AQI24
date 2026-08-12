@@ -1,68 +1,51 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { useEffect, lazy, Suspense, useState, useRef } from 'react';
+import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import Navbar from './components/layout/Navbar';
-import TimelineSyncBar from './components/ui/TimelineSyncBar';
+import Footer from './components/layout/Footer';
 import ErrorBoundary from './components/ui/ErrorBoundary';
+import { LocationProvider } from './context/LocationContext';
+import { AuthProvider } from './context/AuthContext';
+import RequireAuth from './components/auth/RequireAuth';
 import './index.css';
 
-const LandingPage = lazy(() => import('./pages/LandingPage'));
-const DashboardPage = lazy(() => import('./pages/DashboardPage'));
-const AQIMapPage = lazy(() => import('./pages/AQIMapPage'));
-const HCHOPage = lazy(() => import('./pages/HCHOPage'));
-const FirePage = lazy(() => import('./pages/FirePage'));
-const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
-const HistoricalPage = lazy(() => import('./pages/HistoricalPage'));
+const HomePage = lazy(() => import('./pages/HomePage'));
 const ForecastPage = lazy(() => import('./pages/ForecastPage'));
+const HistoricalPage = lazy(() => import('./pages/HistoricalPage'));
+const MapPage = lazy(() => import('./pages/MapPage'));
+const ResearchPage = lazy(() => import('./pages/ResearchPage'));
 const MethodologyPage = lazy(() => import('./pages/MethodologyPage'));
-const AboutPage = lazy(() => import('./pages/AboutPage'));
+const HCHOPage = lazy(() => import('./pages/HCHOPage'));
 const MLPage = lazy(() => import('./pages/MLPage'));
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const MyLocationsPage = lazy(() => import('./pages/MyLocationsPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 
-const pages = {
-  landing: LandingPage,
-  dashboard: DashboardPage,
-  aqimap: AQIMapPage,
-  hcho: HCHOPage,
-  fire: FirePage,
-  analytics: AnalyticsPage,
-  historical: HistoricalPage,
-  forecast: ForecastPage,
-  methodology: MethodologyPage,
-  about: AboutPage,
-  ml: MLPage,
+const TITLES = {
+  '/': 'AQI24 — Know tomorrow',
+  '/forecast': 'Forecast · AQI24',
+  '/history': 'Explore the Past · AQI24',
+  '/map': 'Map · AQI24',
+  '/research': 'Research & Data · AQI24',
+  '/research/methodology': 'Methodology · AQI24',
+  '/research/indicators': 'Air quality indicators · AQI24',
+  '/research/models': 'Model information · AQI24',
+  '/research/analytics': 'Trends & Analytics · AQI24',
+  '/research/about': 'About · AQI24',
+  '/login': 'Sign in · AQI24',
+  '/my-locations': 'My Locations · AQI24',
+  '/profile': 'Profile · AQI24',
 };
 
-// Human-readable titles for the document <title> and the screen-reader page
-// announcer — this app switches "pages" via state rather than real routes,
-// so without this, assistive tech and the browser tab give no signal that
-// navigation happened.
-const PAGE_TITLES = {
-  landing: 'AQI24 — Surface AQI & HCHO Platform',
-  dashboard: 'Dashboard · AQI24',
-  aqimap: 'AQI Map · AQI24',
-  hcho: 'HCHO Hotspots · AQI24',
-  fire: 'Active Fires · AQI24',
-  analytics: 'Analytics · AQI24',
-  historical: 'Historical Trends · AQI24',
-  forecast: 'Forecast · AQI24',
-  methodology: 'Methodology · AQI24',
-  about: 'About · AQI24',
-  ml: 'ML Model · AQI24',
-};
-
-// Per-section meta descriptions — synced to the <meta name="description"> tag
-// on navigation (this app has no real routes, so the SPA must do it manually).
-const PAGE_DESCRIPTIONS = {
-  landing: 'AQI24 — India\u2019s satellite-fused Air Quality Intelligence Platform. Surface AQI prediction, HCHO hotspot detection, and active fire tracking.',
-  dashboard: 'Live national AQI dashboard for India — real-time station readings, weather conditions, health advice, and worst-affected cities.',
-  aqimap: 'Interactive India AQI map with live WAQI station telemetry and historically modeled year-by-year estimates.',
-  hcho: 'Formaldehyde (HCHO) column density hotspots from Sentinel-5P TROPOMI — biomass burning and industrial VOC proxy.',
-  fire: 'Active fire tracking from NASA FIRMS VIIRS S-NPP — thermal anomalies and radiative power across India.',
-  analytics: 'Multi-sensor correlation analytics: AQI trends, HCHO columns vs active fires, pollutant composition, and state rankings.',
-  historical: 'Long-term AQI trend analysis for India (1980–2026) with MERRA-2 reanalysis baseline estimates and fire counts.',
-  forecast: 'PM2.5 and AQI forecasts from Open-Meteo CAMS — EPA-standard AQI computation for Indian cities.',
-  methodology: 'How AQI24 fuses satellite, station, and ML data — sources, processing pipelines, and uncertainty.',
-  about: 'About the AQI24 team and mission.',
-  ml: 'Fire Radiative Power prediction — ConvLSTM + Attention and XGBoost models trained on 8.6M NASA FIRMS fire detections.',
+const DESCRIPTIONS = {
+  '/': 'AQI24 shows you what the weather and air quality around you could look like tomorrow and in the days ahead — built from historical patterns, recent observations and real atmospheric models.',
+  '/forecast': 'Air quality and weather outlook for the coming days — AQI, PM2.5, temperature, humidity, wind and rain.',
+  '/history': 'Explore how the air quality and weather in your area have changed over the years.',
+  '/map': 'Explore air quality and fire activity across India on an interactive map.',
+  '/research': 'Data sources, methodology, model information and historical datasets for researchers.',
+  '/login': 'Sign in to AQI24 to save your places and get more from your forecast.',
 };
 
 function PageSkeleton() {
@@ -77,86 +60,93 @@ function PageSkeleton() {
   );
 }
 
-export default function App() {
-  const [activeSection, setActiveSection] = useState('landing');
-  const [selectedYear, setSelectedYear] = useState('Live');
+function AppShell() {
   const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('theme') || 'dark';
-    if (saved === 'light') document.body.classList.add('light-theme');
-    else document.body.classList.remove('light-theme');
+    const saved = localStorage.getItem('theme') || 'light';
+    document.body.classList.toggle('light-theme', saved === 'light');
     return saved;
   });
   const mainRef = useRef(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    document.title = TITLES[location.pathname] || TITLES['/'];
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute('content', DESCRIPTIONS[location.pathname] || DESCRIPTIONS['/']);
+    if (mainRef.current) mainRef.current.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [location.pathname]);
 
   const toggleTheme = () => {
     setTheme(prev => {
       const next = prev === 'dark' ? 'light' : 'dark';
       localStorage.setItem('theme', next);
-      if (next === 'light') document.body.classList.add('light-theme');
-      else document.body.classList.remove('light-theme');
+      document.body.classList.toggle('light-theme', next === 'light');
       return next;
     });
   };
 
-  const navigate = (section) => setActiveSection(section || 'dashboard');
-  const PageComponent = pages[activeSection] || DashboardPage;
-  const pageTitle = PAGE_TITLES[activeSection] || PAGE_TITLES.dashboard;
-  const pageDescription = PAGE_DESCRIPTIONS[activeSection] || PAGE_DESCRIPTIONS.dashboard;
-  const isLanding = activeSection === 'landing';
-
-  // Keep the browser tab title in sync, and move focus to the new "page" for
-  // keyboard and screen-reader users on every navigation (since there is no
-  // real route change for the browser to announce on its own).
-  useEffect(() => {
-    document.title = pageTitle;
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute('content', pageDescription);
-    if (mainRef.current) mainRef.current.focus({ preventScroll: false });
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  }, [activeSection, pageTitle, pageDescription]);
-
   return (
-    <div className="min-h-screen bg-space-950 scanline-overlay">
+    <div className="min-h-screen relative">
+      <div className="atmos-bg" aria-hidden="true" />
       <a href="#main-content" className="skip-link">Skip to main content</a>
 
-      <Navbar activeSection={activeSection} onNav={navigate} theme={theme} onToggleTheme={toggleTheme} overlay={isLanding} />
+      <Navbar theme={theme} onToggleTheme={toggleTheme} />
 
       {/* Visually-hidden live region announcing page changes to assistive tech */}
-      <div aria-live="polite" className="sr-only">{pageTitle}</div>
+      <div aria-live="polite" className="sr-only">{TITLES[location.pathname] || TITLES['/']}</div>
 
       <main
         id="main-content"
         ref={mainRef}
         tabIndex={-1}
-        className={isLanding ? 'outline-none' : 'pt-14 pb-28 sm:pb-32 outline-none'}
+        className="pt-14 pb-24 outline-none"
       >
         <AnimatePresence mode="wait">
           <motion.div
-            key={activeSection}
+            key={location.pathname}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
           >
-            <ErrorBoundary key={activeSection}>
+            <ErrorBoundary key={location.pathname}>
               <Suspense fallback={<PageSkeleton />}>
-                <PageComponent
-                  onEnter={navigate}
-                  onNav={navigate}
-                  selectedYear={selectedYear}
-                  setSelectedYear={setSelectedYear}
-                />
+                <Routes location={location}>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/forecast" element={<ForecastPage />} />
+                  <Route path="/history" element={<HistoricalPage />} />
+                  <Route path="/map" element={<MapPage />} />
+                  <Route path="/research" element={<ResearchPage />} />
+                  <Route path="/research/methodology" element={<MethodologyPage />} />
+                  <Route path="/research/indicators" element={<HCHOPage />} />
+                  <Route path="/research/models" element={<MLPage />} />
+                  <Route path="/research/analytics" element={<AnalyticsPage />} />
+                  <Route path="/research/about" element={<AboutPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/my-locations" element={<RequireAuth><MyLocationsPage /></RequireAuth>} />
+                  <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
+                  <Route path="*" element={<HomePage />} />
+                </Routes>
               </Suspense>
             </ErrorBoundary>
           </motion.div>
         </AnimatePresence>
       </main>
 
-      {!isLanding && (
-        <div className="fixed bottom-3 left-3 right-3 z-40 max-w-screen-2xl mx-auto">
-          <TimelineSyncBar selectedYear={selectedYear} setSelectedYear={setSelectedYear} />
-        </div>
-      )}
+      <Footer />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <HashRouter>
+      <AuthProvider>
+        <LocationProvider>
+          <AppShell />
+        </LocationProvider>
+      </AuthProvider>
+    </HashRouter>
   );
 }

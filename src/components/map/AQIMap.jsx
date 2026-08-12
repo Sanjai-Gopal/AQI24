@@ -1,23 +1,25 @@
-import { useEffect, useState, useCallback, memo } from 'react';
+import { useEffect, useState, useCallback, useMemo, memo } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Tooltip, useMap, ZoomControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { motion, AnimatePresence } from 'motion/react';
 import { getAQIColor, getAQICategory } from '../../utils/aqiUtils';
 import AQILegend from '../ui/AQILegend';
 import { MapPanel, MapStyleSwitcher, MapCountBadge, MapCloseButton } from './MapUI';
-import { Layers, Globe, Navigation, Map, Maximize2, X, Search } from 'lucide-react';
+import { Layers, Globe, Navigation, Map, Maximize2, X, Search, ChevronRight } from 'lucide-react';
 
 const STYLE_OPTIONS = [
-  { key: 'satellite', Icon: Globe, label: 'Satellite' },
-  { key: 'dark', Icon: Map, label: 'Dark' },
   { key: 'street', Icon: Navigation, label: 'Street' },
+  { key: 'satellite', Icon: Globe, label: 'Satellite' },
   { key: 'terrain', Icon: Layers, label: 'Terrain' },
+  { key: 'dark', Icon: Map, label: 'Dark' },
 ];
 
 function MapController({ center, zoom }) {
   const map = useMap();
   useEffect(() => {
-    map.setView(center, zoom, { animate: true });
+    if (Array.isArray(center) && center.length === 2 && typeof zoom === 'number') {
+      map.setView(center, zoom, { animate: true });
+    }
   }, [map, center, zoom]);
   return null;
 }
@@ -38,16 +40,36 @@ const TILES = {
   terrain: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', attr: 'Esri' },
 };
 
-function AQIMap({ stations = [], selectedYear = 'Live' }) {
+function AQIMap({ stations = [], selectedYear = 'Live', highlight = null }) {
   const [selected, setSelected] = useState(null);
   const [filterMin, setFilterMin] = useState(0);
-  const [mapStyle, setMapStyle] = useState('satellite');
+  const [mapStyle, setMapStyle] = useState('street');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [mapCenter, setMapCenter] = useState([22.5, 82.0]);
-  const [mapZoom, setMapZoom] = useState(5);
+  const [mapCenter, setMapCenter] = useState(null);
+  const [mapZoom, setMapZoom] = useState(null);
+
+  // The city the user is currently watching. Prefer the real marker on the
+  // map when one exists; otherwise fall back to the reference record.
+  const highlightMatch = useMemo(() => {
+    if (!highlight) return null;
+    if (!Array.isArray(stations) || stations.length === 0) return highlight;
+    const q = String(highlight.city || '').toLowerCase();
+    const m = stations.find(
+      s => s.city?.toLowerCase().includes(q) || q.includes(String(s.city || '').toLowerCase())
+    );
+    return m || highlight;
+  }, [highlight, stations]);
 
   useEffect(() => { setSelected(null); }, [stations]);
+
+  // Initial view: start on the selected city so the first thing people see
+  // is "their" place, then keep the map stable afterwards.
+  const initialCenter = useMemo(
+    () => (highlightMatch ? [highlightMatch.lat, highlightMatch.lng] : [22.5, 82.0]),
+    [highlightMatch]
+  );
+  const initialZoom = highlightMatch ? 6 : 5;
 
   const filtered = stations.filter(s =>
     s.aqi >= filterMin &&
@@ -64,7 +86,15 @@ function AQIMap({ stations = [], selectedYear = 'Live' }) {
     }
   }, [stations]);
 
+  const openHighlight = useCallback(() => {
+    if (!highlightMatch) return;
+    setMapCenter([highlightMatch.lat, highlightMatch.lng]);
+    setMapZoom(9);
+    setSelected(highlightMatch);
+  }, [highlightMatch]);
+
   const tile = TILES[mapStyle];
+  const hColor = highlightMatch ? getAQIColor(highlightMatch.aqi) : '#64748b';
 
   const mapEl = (
     <div
@@ -72,8 +102,8 @@ function AQIMap({ stations = [], selectedYear = 'Live' }) {
       data-style={mapStyle}
     >
       <MapContainer
-        center={[22.5, 82.0]}
-        zoom={5}
+        center={initialCenter}
+        zoom={initialZoom}
         style={{ width: '100%', height: '100%', borderRadius: isFullscreen ? 0 : 16 }}
         zoomControl={false}
         attributionControl={false}
@@ -116,14 +146,14 @@ function AQIMap({ stations = [], selectedYear = 'Live' }) {
       {/* Top controls */}
       <div className="absolute top-3 left-3 right-3 z-[999] flex flex-wrap items-start justify-between gap-2 pointer-events-none">
         <MapPanel className="flex items-center gap-2 px-3 py-2 rounded-xl">
-          <Search size={12} className="text-cyan-400 flex-shrink-0" aria-hidden="true" />
+          <Search size={12} className="text-sky-500 flex-shrink-0" aria-hidden="true" />
           <label htmlFor="aqi-map-search" className="sr-only">Search by city name</label>
           <input
             id="aqi-map-search"
             value={searchQuery}
             onChange={e => handleCitySearch(e.target.value)}
-            placeholder="Search city…"
-            className="bg-transparent text-white text-xs outline-none w-28 placeholder-slate-600"
+            placeholder="Search a city…"
+            className="bg-transparent text-[var(--text-main)] text-xs outline-none w-32 placeholder:text-slate-500"
           />
         </MapPanel>
         <div className="pointer-events-auto flex items-start gap-2">
@@ -139,11 +169,39 @@ function AQIMap({ stations = [], selectedYear = 'Live' }) {
         </div>
       </div>
 
+      {/* Selected city card — the friendly first thing a visitor reads */}
+      {highlightMatch && (
+        <div className="absolute top-16 left-3 z-[999] pointer-events-auto panel p-4 w-60">
+          <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-faint)' }}>
+            Selected location
+          </div>
+          <div className="mt-1 text-base font-bold" style={{ color: 'var(--text-main)' }}>
+            {highlightMatch.city || highlightMatch.stationName || 'This city'}
+          </div>
+          <div className="mt-2 flex items-end gap-2">
+            <div className="text-5xl font-black leading-none" style={{ color: hColor }}>
+              {highlightMatch.aqi ?? '—'}
+            </div>
+            <div className="pb-1">
+              <div className="text-sm font-bold" style={{ color: hColor }}>
+                {getAQICategory(highlightMatch.aqi)}
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={openHighlight}
+            className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-sky-600 hover:text-sky-700 transition-colors"
+          >
+            View details <ChevronRight size={13} aria-hidden="true" />
+          </button>
+        </div>
+      )}
+
       {/* Bottom-left: filter + legend */}
       <div className="absolute bottom-3 left-3 z-[999] flex flex-col gap-2 items-start">
         <MapPanel className="rounded-xl px-3 py-2.5">
-          <label htmlFor="aqi-min-filter" className="block text-[10px] text-slate-500 font-mono mb-1.5 uppercase">
-            Min AQI: <span className="text-cyan-400">{filterMin}</span>
+          <label htmlFor="aqi-min-filter" className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-wide">
+            Show stations with AQI from <span className="text-sky-500 font-bold">{filterMin}</span>
           </label>
           <input
             id="aqi-min-filter"
@@ -209,7 +267,7 @@ function AQIMap({ stations = [], selectedYear = 'Live' }) {
               )}
               <div className="mt-2 flex items-center gap-1.5 text-[10px] font-mono">
                 {selected.isLive
-                  ? <><span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" aria-hidden="true" /><span className="text-emerald-400">Live WAQI</span></>
+                  ? <><span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" aria-hidden="true" /><span className="text-emerald-400">Current WAQI reading</span></>
                   : selected.isModeled
                   ? <><span className="w-1.5 h-1.5 bg-amber-400 rounded-full" aria-hidden="true" /><span className="text-amber-400">Modeled estimate</span></>
                   : <><span className="w-1.5 h-1.5 bg-slate-500 rounded-full" aria-hidden="true" /><span className="text-slate-500">Reference data</span></>
