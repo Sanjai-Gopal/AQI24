@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#cbe6ff" />
+    <meta name="description" content="AQI24 — know tomorrow, understand what comes next. Forecasts, historical records and research data for India's air quality." />
+    <meta property="og:title" content="AQI24 — Know tomorrow. Understand what comes next." />
+    <meta property="og:description" content="Environmental intelligence built from historical patterns, recent observations and real atmospheric models — forecasts, historical records and research data for India's air quality." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="AQI24 — air quality forecasting platform preview" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AQI24 — Know tomorrow. Understand what comes next." />
+    <meta name="twitter:description" content="Forecasts, historical records and research data for India's air quality." />
+    <meta name="twitter:image" content="/og-image.png" />
+    <meta name="robots" content="index, follow" />
+    <meta name="keywords" content="AQI, air quality index, India, forecast, history, WAQI, Open-Meteo, NASA FIRMS, satellite" />
+    <title>AQI24 — Know tomorrow, understand what comes next</title>
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "AQI24",
+      "description": "Environmental intelligence for tomorrow — air quality forecasts, historical records and research data for India.",
+      "applicationCategory": "WeatherApplication",
+      "operatingSystem": "Web",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "INR" },
+      "browserRequirements": "Requires JavaScript"
+    }
+    </script>
+
+    <!-- Fonts: preconnect + non-blocking stylesheet (avoids the @import waterfall) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+
+    <!-- Live data sources used by the AQI / Fire / Forecast pages -->
+    <link rel="preconnect" href="https://api.waqi.info">
+    <link rel="preconnect" href="https://firms.modaps.eosdis.nasa.gov">
+    <link rel="preconnect" href="https://air-quality-api.open-meteo.com">
+    <link rel="preconnect" href="https://server.arcgisonline.com">
+    <link rel="preconnect" href="https://basemaps.cartocdn.com">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
