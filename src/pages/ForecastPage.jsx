@@ -14,7 +14,7 @@ export default function ForecastPage() {
       <PageHeader
         eyebrow="Forecast · coming days"
         title="What will the air be like?"
-        description="Current conditions and forecast air quality for the coming days, computed from atmospheric models and recent observations."
+        description="Weather forecast and air-quality outlook are shown separately. Air-quality values are derived from an atmospheric-model forecast (PM2.5 → AQI), not a live monitoring reading unless one is available."
         accent="sky"
       />
 

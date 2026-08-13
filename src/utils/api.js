@@ -295,6 +295,39 @@ export async function fetchForecast(lat, lng, cityName = '') {
   }
 }
 
+// ─── Open-Meteo Geocoding: resolve any city name to lat/lng ─────────────────
+// Free, no key. We restrict to Indian results when possible.
+export async function geocodeCity(name) {
+  if (!name?.trim()) return null;
+  const key = `geo_${name.trim().toLowerCase()}`;
+  const cached = getCached(key);
+  if (cached) return cached;
+
+  try {
+    const json = await fetchWithRetry(
+      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=5&language=en&format=json`,
+      { timeout: 8000 }
+    );
+    const results = json?.results || [];
+    const india = results.find(r =>
+      r?.country_code === 'IN' ||
+      r?.country?.toLowerCase()?.includes('india') ||
+      (r?.latitude >= 6 && r?.latitude <= 38 && r?.longitude >= 68 && r?.longitude <= 98)
+    );
+    const result = india || results[0];
+    if (!result) return null;
+    const out = {
+      city: result.name || name,
+      lat: result.latitude,
+      lng: result.longitude,
+    };
+    setCache(key, out, 24 * 60 * 60 * 1000);
+    return out;
+  } catch {
+    return null;
+  }
+}
+
 // ─── WAQI Map feed: fetch all stations in India bounds ────────────────────
 export async function fetchWAQIMapFeed() {
   if (!WAQI_TOKEN) return { error: 'VITE_WAQI_API_TOKEN not set', stations: [] };

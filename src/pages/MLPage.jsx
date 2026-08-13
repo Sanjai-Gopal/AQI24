@@ -4,7 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell,
 } from 'recharts';
-import { Brain, Database, Target, Zap, TrendingUp, TriangleAlert as AlertTriangle, CircleCheck as CheckCircle, ArrowRight, Cpu, Layers } from 'lucide-react';
+import { Brain, Database, Target, Zap, TrendingUp, TriangleAlert as AlertTriangle, CircleCheck as CheckCircle, ArrowRight, Cpu, Layers, FlaskConical, Award, Activity } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
 import { ChipGroup, ToggleChip } from '../components/ui/Chip';
 import { StatusBadge } from '../components/ui/Badge';
@@ -37,6 +37,77 @@ const WORKFLOW = [
   { step: '03', title: 'Model Training', icon: Cpu, color: '#fbbf24', desc: 'LightGBM regressor + XGBoost classifier, temporal split' },
   { step: '04', title: 'Inference', icon: Zap, color: '#34d399', desc: 'FRP prediction (MW) + 4-class severity classification' },
 ];
+
+// ── Real PM2.5 next-day experiment (Nehru Nagar, Delhi) ─────────────────
+const PM25_DATA = {
+  station: 'Nehru Nagar, Delhi (DPCC)',
+  period: '2019-01-08 to 2025-12-31',
+  observations: 2527,
+  target: 'Next-day PM2.5',
+  lstm: { rmse: 36.41, r2: 0.8681 },
+};
+
+const PM25_MODELS = [
+  { name: 'Persistence', mae: 25.27 },
+  { name: 'Linear Regression', mae: 23.97, best: true },
+  { name: 'LightGBM', mae: 24.22 },
+  { name: 'LSTM', mae: 24.45 },
+];
+
+function PM25Experiment() {
+  return (
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="panel p-5 md:p-6">
+      <div className="flex items-start justify-between flex-wrap gap-3 mb-5">
+        <div>
+          <div className="text-sm font-bold text-[var(--text-main)] mb-1">Next-day PM2.5 experiment</div>
+          <div className="text-xs text-[var(--text-muted)] font-mono">Nehru Nagar, Delhi (DPCC) · 2019-01-08 → 2025-12-31 · {PM25_DATA.observations.toLocaleString()} daily observations</div>
+        </div>
+        <StatusBadge tone="modeled">
+          <FlaskConical size={11} aria-hidden="true" />
+          <span>Model benchmark · Live inference unavailable</span>
+        </StatusBadge>
+      </div>
+
+      <p className="text-xs text-[var(--text-muted)] leading-relaxed mb-5 max-w-3xl">
+        We tested whether historical PM2.5 patterns can support next-day forecasting for a single station.
+        Values are reported in µg/m³. Lower MAE is better. The LSTM metrics are RMSE = 36.41 µg/m³ and R² = 0.8681.
+      </p>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        {PM25_MODELS.map(({ name, mae, best }) => (
+          <div key={name} className="rounded-xl p-3.5" style={{ background: best ? 'rgba(52,211,153,0.08)' : 'var(--app-bg-2)', border: `1px solid ${best ? 'rgba(52,211,153,0.25)' : 'var(--panel-border)'}` }}>
+            <div className="text-[10px] font-semibold text-[var(--text-faint)] uppercase tracking-wide">{name}</div>
+            <div className="text-2xl font-black font-mono mt-1" style={{ color: best ? '#34d399' : 'var(--text-main)' }}>{mae}</div>
+            <div className="text-[10px] text-[var(--text-muted)] mt-0.5">MAE µg/m³</div>
+            {best && <div className="inline-flex items-center gap-1 text-[10px] text-emerald-400 mt-2 font-semibold"><Award size={10} aria-hidden="true" /> Best MAE</div>}
+          </div>
+        ))}
+      </div>
+
+      <div className="text-xs text-[var(--text-muted)] mb-4">Mean absolute error by model (µg/m³)</div>
+      <div className="h-56">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={PM25_MODELS} margin={{ top: 4, right: 8, left: -12, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+            <XAxis dataKey="name" tick={{ fill: 'var(--text-faint)', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: 'var(--text-faint)', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} label={{ value: 'MAE (µg/m³)', angle: -90, position: 'insideLeft', fill: 'var(--text-muted)', fontSize: 9 }} />
+            <Tooltip {...tooltipStyle} formatter={v => [`${v} µg/m³`, 'MAE']} />
+            <Bar dataKey="mae" name="MAE" radius={[4, 4, 0, 0]}>
+              {PM25_MODELS.map((m, i) => (
+                <Cell key={i} fill={m.best ? '#34d399' : '#a78bfa'} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="mt-5 rounded-xl p-3.5 text-xs leading-relaxed" style={{ background: 'var(--app-bg-2)', border: '1px solid var(--panel-border)' }}>
+        <div className="flex items-center gap-1.5 mb-1 font-semibold text-[var(--text-main)]"><Activity size={13} className="text-amber-400" aria-hidden="true" /> Limitation</div>
+        <p className="text-[var(--text-muted)]">The current trained model is a research MVP for one station (Nehru Nagar, Delhi). It is not a live nationwide inference service and is not used to generate map or forecast values.</p>
+      </div>
+    </motion.div>
+  );
+}
 
 export default function MLPage() {
   const [data, setData] = useState(null);
@@ -90,22 +161,23 @@ export default function MLPage() {
   return (
     <div className="p-4 md:p-6 space-y-8">
       <PageHeader
-        eyebrow="Machine Learning · NASA FIRMS VIIRS S-NPP"
-        title="Fire Radiative Power Prediction"
-        description="LightGBM FRP regressor and XGBoost severity classifier trained on NASA FIRMS VIIRS S-NPP fire detections across India (2012–2026). Predicts FRP (MW) and fire severity class."
+        eyebrow="Machine Learning · Air quality"
+        title="PM2.5 next-day forecasting experiment"
+        description="AQI24 includes a real next-day PM2.5 research experiment for Nehru Nagar, Delhi. A separate NASA FIRMS fire model is shown further down the page."
         accent="violet"
       >
-        {info && (
-          <StatusBadge tone="live" pulse>
-            <CheckCircle size={11} aria-hidden="true" />
-            <span>Model loaded</span>
-          </StatusBadge>
-        )}
+        <StatusBadge tone="modeled">
+          <FlaskConical size={11} aria-hidden="true" />
+          <span>Model benchmark available · Live inference unavailable</span>
+        </StatusBadge>
       </PageHeader>
+
+      {/* ── PM2.5 experiment card ─────────────────────────────────────────── */}
+      <PM25Experiment />
 
       {/* ── Workflow / Architecture diagram ─────────────────────────────── */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="panel p-6">
-        <div className="text-sm font-bold text-white mb-4">Model Architecture & Workflow</div>
+        <div className="text-sm font-bold text-[var(--text-main)] mb-4">Fire model architecture & workflow</div>
         <div className="grid md:grid-cols-4 gap-3">
           {WORKFLOW.map((w, i) => {
             const Icon = w.icon;
@@ -188,8 +260,8 @@ export default function MLPage() {
       {/* ── Regional predictions + feature importance ────────────────────── */}
       <div className="grid md:grid-cols-2 gap-6">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="panel p-5">
-          <div className="text-sm font-bold text-white mb-0.5">Regional FRP Predictions</div>
-          <div className="text-xs text-slate-500 mb-4 font-mono">Model inference on 15 Indian fire regions</div>
+          <div className="text-sm font-bold text-[var(--text-main)] mb-0.5">Regional FRP predictions</div>
+          <div className="text-xs text-[var(--text-muted)] mb-4 font-mono">Fire radiative power inference on 15 Indian fire regions</div>
 
           <div className="flex gap-2 mb-4 flex-wrap">
             <ChipGroup label="Filter by season">
@@ -240,8 +312,8 @@ export default function MLPage() {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="panel p-5">
-          <div className="text-sm font-bold text-white mb-0.5">Feature Importance — FRP Regressor</div>
-          <div className="text-xs text-slate-500 mb-4 font-mono">
+          <div className="text-sm font-bold text-[var(--text-main)] mb-0.5">Feature Importance — FRP Regressor</div>
+          <div className="text-xs text-[var(--text-muted)] mb-4 font-mono">
             {info?.frp_regressor?.algorithm} gain importance (top 8 features)
           </div>
           {loading ? <Skeleton h="h-64" /> : (
@@ -269,8 +341,8 @@ export default function MLPage() {
       {/* ── Classifier importance + model card ─────────────────────────── */}
       <div className="grid md:grid-cols-2 gap-6">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="panel p-5">
-          <div className="text-sm font-bold text-white mb-0.5">Feature Importance — Severity Classifier</div>
-          <div className="text-xs text-slate-500 mb-4 font-mono">
+          <div className="text-sm font-bold text-[var(--text-main)] mb-0.5">Feature Importance — Severity Classifier</div>
+          <div className="text-xs text-[var(--text-muted)] mb-4 font-mono">
             {info?.severity_classifier?.algorithm} gain importance (4-class: Low/Med/High/Extreme)
           </div>
           {loading ? <Skeleton h="h-52" /> : (
@@ -295,7 +367,7 @@ export default function MLPage() {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="panel p-5 space-y-4">
-          <div className="text-sm font-bold text-white">Model Architecture</div>
+          <div className="text-sm font-bold text-[var(--text-main)]">Fire model architecture</div>
           {info && (
             <div className="space-y-3 text-xs">
               {[
@@ -349,8 +421,8 @@ export default function MLPage() {
 
       {/* ── Severity distribution ───────────────────────────────────────── */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="panel p-5">
-        <div className="text-sm font-bold text-white mb-0.5">Severity Distribution Across Regions</div>
-        <div className="text-xs text-slate-500 mb-4 font-mono">
+        <div className="text-sm font-bold text-[var(--text-main)] mb-0.5">Severity Distribution Across Regions</div>
+        <div className="text-xs text-[var(--text-muted)] mb-4 font-mono">
           {season.replace('_',' ')} season · {brightnessLevel} brightness — predicted severity breakdown
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -373,11 +445,12 @@ export default function MLPage() {
       <div className="panel p-4 text-[11px] font-mono leading-relaxed"
         style={{ color: '#475569', borderColor: 'rgba(167,139,250,0.12)' }}>
         <span className="text-violet-400 font-semibold">Methodology: </span>
-        Models trained on {info?.n_train != null ? fmtInt(info.n_train) : 'a sampled subset of'} VIIRS fire pixel records{info?.total_records_in_dataset != null ? ` (from ${fmtInt(info.total_records_in_dataset)} total archive detections)` : ''}.
+        The fire radiative power (FRP) models are trained on {info?.n_train != null ? fmtInt(info.n_train) : 'a sampled subset of'} VIIRS fire pixel records{info?.total_records_in_dataset != null ? ` (from ${fmtInt(info.total_records_in_dataset)} total archive detections)` : ''}.
         Temporal train/test split: train on 2012–2024, test on 2025–2026.
         Features include brightness temperatures, spatial coordinates, seasonal cyclical encoding, pixel geometry, and confidence level.
         FRP is log₁₊-transformed before training to handle right-skewed distribution.
-        All metrics computed on real held-out data — no fabricated values.
+        The PM2.5 experiment below is a separate research MVP trained on daily station observations for Nehru Nagar, Delhi.
+        Live inference is unavailable for PM2.5; benchmark metrics are shown.
         Dataset: NASA FIRMS VIIRS S-NPP Collection 2 (India, 68°E–97°E, 8°N–37°N).
       </div>
     </div>

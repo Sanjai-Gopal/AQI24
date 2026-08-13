@@ -13,11 +13,14 @@ export default function LocationPicker({ autoFocus = false }) {
   const { city, allCities, selectCity, useDeviceLocation, usingDeviceLocation, geoStatus } = useLocation();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [localLoading, setLocalLoading] = useState(false);
   const inputRef = useRef(null);
 
+  const trimmed = query.trim();
+  const q = trimmed.toLowerCase();
+
   const filtered = useMemo(() => {
-    if (!query.trim()) return allCities.slice(0, MAX_SUGGESTIONS);
-    const q = query.trim().toLowerCase();
+    if (!trimmed) return allCities.slice(0, MAX_SUGGESTIONS);
     const scored = allCities
       .map(c => {
         const idx = c.toLowerCase().indexOf(q);
@@ -27,12 +30,18 @@ export default function LocationPicker({ autoFocus = false }) {
       .sort((a, b) => a.idx - b.idx || a.c.length - b.c.length)
       .map(x => x.c);
     return scored.slice(0, MAX_SUGGESTIONS);
-  }, [allCities, query]);
+  }, [allCities, q, trimmed]);
 
-  const pick = c => {
-    selectCity(c);
-    setOpen(false);
-    setQuery('');
+  const showSearchOption = trimmed && !filtered.some(c => c.toLowerCase() === q);
+
+  const pick = async (c) => {
+    setLocalLoading(true);
+    const result = await selectCity(c);
+    setLocalLoading(false);
+    if (result) {
+      setOpen(false);
+      setQuery('');
+    }
   };
 
   const openList = () => {
@@ -102,8 +111,27 @@ export default function LocationPicker({ autoFocus = false }) {
                 </div>
               </div>
               <ul role="listbox" aria-label="City results" className="max-h-72 overflow-y-auto py-1.5">
-                {filtered.length === 0 && (
+                {filtered.length === 0 && !showSearchOption && (
                   <li className="px-4 py-3 text-sm" style={{ color: 'var(--text-muted)' }}>No cities match &ldquo;{query}&rdquo;.</li>
+                )}
+                {showSearchOption && (
+                  <li>
+                    <button
+                      type="button"
+                      role="option"
+                      onClick={() => pick(trimmed)}
+                      disabled={localLoading}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left hover:bg-sky-400/10 transition-colors disabled:opacity-60"
+                      style={{ color: 'var(--text-main)' }}
+                    >
+                      {localLoading ? (
+                        <Loader2 size={13} className="text-sky-400 animate-spin" aria-hidden="true" />
+                      ) : (
+                        <Search size={13} className="text-sky-400" aria-hidden="true" />
+                      )}
+                      <span className="flex-1">Search for &ldquo;{trimmed}&rdquo;</span>
+                    </button>
+                  </li>
                 )}
                 {filtered.map(c => {
                   const active = c === city;

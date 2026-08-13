@@ -1,6 +1,7 @@
 // ─── AQI Utility Functions ────────────────────────────────────────────────────
 
 export const getAQIColor = (aqi) => {
+  if (aqi == null || Number.isNaN(Number(aqi))) return '#94a3b8';
   if (aqi <= 50) return '#34d399';
   if (aqi <= 100) return '#fbbf24';
   if (aqi <= 150) return '#fb923c';
@@ -10,6 +11,7 @@ export const getAQIColor = (aqi) => {
 };
 
 export const getAQICategory = (aqi) => {
+  if (aqi == null || Number.isNaN(Number(aqi))) return 'No data';
   if (aqi <= 50) return 'Good';
   if (aqi <= 100) return 'Moderate';
   if (aqi <= 150) return 'Unhealthy for Sensitive';
@@ -19,6 +21,7 @@ export const getAQICategory = (aqi) => {
 };
 
 export const getAQIBg = (aqi) => {
+  if (aqi == null || Number.isNaN(Number(aqi))) return 'rgba(148,163,184,0.15)';
   if (aqi <= 50) return 'rgba(52,211,153,0.15)';
   if (aqi <= 100) return 'rgba(251,191,36,0.15)';
   if (aqi <= 150) return 'rgba(251,146,60,0.15)';
@@ -54,6 +57,19 @@ export const formatDate = (iso) =>
  * Standard US EPA linear interpolation PM2.5 → AQI conversion.
  * Breakpoints from EPA AQI Technical Assistance Document (August 2016).
  */
+export function getDistanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 export function pm25ToAQI(pm25) {
   if (pm25 == null || isNaN(pm25)) return null;
   const c = Math.round(pm25 * 10) / 10; // truncate to 1 decimal per EPA

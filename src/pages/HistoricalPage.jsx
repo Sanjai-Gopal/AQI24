@@ -95,7 +95,12 @@ export default function HistoricalPage() {
           description="Annual reference records of air quality and weather, from 1990 to today. These are modelled reference estimates for context — not ground-station measurements."
           accent="emerald"
         />
-        <ModeledDataBanner />
+        <div className="flex flex-col items-end gap-2">
+          <ModeledDataBanner />
+          <p className="text-[10px] text-right max-w-xs" style={{ color: 'var(--text-faint)' }}>
+            Historical station data for the ML/DL experiment is available for <span className="font-semibold" style={{ color: 'var(--text-sub)' }}>Nehru Nagar, Delhi</span>. Other locations use reference estimates.
+          </p>
+        </div>
       </div>
 
       {/* Controls */}
@@ -201,12 +206,12 @@ export default function HistoricalPage() {
                   <stop offset="95%" stopColor="#94a3b8" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-              <XAxis dataKey="year" tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} interval={3} />
-              <YAxis tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} width={44} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+              <XAxis dataKey="year" tick={{ fill: 'var(--text-faint)', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} interval={3} />
+              <YAxis tick={{ fill: 'var(--text-faint)', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} width={44} />
               <Tooltip {...chartTooltipStyle} />
-              <Legend wrapperStyle={{ fontSize: 11, color: '#64748b' }} />
-              {year >= 1990 && <ReferenceLine x={year} stroke="rgba(34,211,238,0.4)" strokeDasharray="4 4" label={{ value: String(year), fill: '#22d3ee', fontSize: 10 }} />}
+              <Legend wrapperStyle={{ fontSize: 11, color: 'var(--text-muted)' }} />
+              {year >= 1990 && <ReferenceLine x={year} stroke="var(--brand-cyan)" strokeDasharray="4 4" strokeOpacity={0.4} label={{ value: String(year), fill: 'var(--brand-cyan)', fontSize: 10 }} />}
               <Area type="monotone" dataKey="cityValue" name={city} stroke={metricCfg.color} fill="url(#cityHistGrad)" strokeWidth={2} dot={false} isAnimationActive={true} animationDuration={900} animationEasing="easeOut" />
               <Area type="monotone" dataKey="nationalValue" name="National" stroke="#94a3b8" fill="url(#natHistGrad)" strokeWidth={1.5} dot={false} isAnimationActive={true} animationDuration={1100} animationEasing="easeOut" />
             </AreaChart>
@@ -221,9 +226,9 @@ export default function HistoricalPage() {
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={compareChartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="year" tick={{ fill: '#64748b', fontSize: 11, fontFamily: 'monospace' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#64748b', fontSize: 11, fontFamily: 'monospace' }} axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                <XAxis dataKey="year" tick={{ fill: 'var(--text-faint)', fontSize: 11, fontFamily: 'monospace' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: 'var(--text-faint)', fontSize: 11, fontFamily: 'monospace' }} axisLine={false} tickLine={false} />
                 <Tooltip {...chartTooltipStyle} />
                 <Bar dataKey="cityValue" name={showFires ? `National · ${metricCfg.label}` : `${city} · ${metricCfg.label}`} radius={[4, 4, 0, 0]} isAnimationActive={true} animationDuration={500}>
                   {compareChartData.map((d, i) => (
@@ -251,9 +256,9 @@ export default function HistoricalPage() {
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={monthly}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                  <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                  <XAxis dataKey="month" tick={{ fill: 'var(--text-faint)', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: 'var(--text-faint)', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} />
                   <Tooltip {...chartTooltipStyle} />
                   <Bar dataKey="national" name="National AQI" fill="#34d399" radius={[3, 3, 0, 0]} isAnimationActive={true} animationDuration={600} />
                 </BarChart>

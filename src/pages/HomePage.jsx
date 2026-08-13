@@ -33,27 +33,27 @@ export default function HomePage() {
           className="text-xs font-semibold uppercase tracking-[0.18em]"
           style={{ color: 'var(--text-faint)' }}
         >
-          Weather &amp; air quality · one day ahead
+          Air quality where monitoring stations cannot reach
         </motion.p>
 
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.05 }}
-          className="mt-5 text-5xl sm:text-6xl md:text-7xl font-black leading-[1.02] tracking-tight"
+          className="mt-5 text-4xl sm:text-5xl md:text-6xl font-black leading-[1.05] tracking-tight"
           style={{ color: 'var(--text-main)' }}
         >
-          Know tomorrow.
+          Know the air quality around you — even where monitoring stations are unavailable.
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.12 }}
-          className="mt-5 text-base md:text-lg leading-relaxed max-w-xl mx-auto"
+          className="mt-5 text-base md:text-lg leading-relaxed max-w-2xl mx-auto"
           style={{ color: 'var(--text-muted)' }}
         >
-          See what the weather and air around you could look like tomorrow — and in the days ahead.
+          AQI24 combines monitoring-station information, spatial estimation and forecasting to make air-quality insights easier to understand.
         </motion.p>
 
         <motion.div
@@ -63,20 +63,43 @@ export default function HomePage() {
           className="mt-7 flex flex-wrap items-center justify-center gap-3"
         >
           <Link
-            to="/forecast"
+            to="/map"
             className="btn-glow inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-500 transition-all shadow-md"
           >
-            Check my forecast <ArrowRight size={15} aria-hidden="true" />
+            Open the map <ArrowRight size={15} aria-hidden="true" />
           </Link>
           <Link
-            to="/history"
+            to="/forecast"
             className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all border"
             style={{ color: 'var(--text-sub)', borderColor: 'var(--panel-border)', background: 'var(--panel-bg)' }}
           >
-            Explore the past
+            View forecast
           </Link>
         </motion.div>
       </section>
+
+      {/* ── AQI24 flow ─────────────────────────────────────────────────── */}
+      <motion.section
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.24 }}
+        className="max-w-3xl mx-auto px-4 mt-8"
+        aria-label="How AQI24 works"
+      >
+        <div className="panel p-4 sm:p-5">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs font-semibold text-[var(--text-main)]">
+            {['Your location', 'Nearby stations', 'Spatial estimate', 'PM2.5 / AQI', 'Forecast'].map((label, i, arr) => (
+              <div key={label} className="flex items-center gap-2 sm:gap-3">
+                <div className="px-2.5 py-1.5 rounded-lg border" style={{ borderColor: 'var(--panel-border)', background: 'var(--app-bg-2)' }}>{label}</div>
+                {i < arr.length - 1 && <ArrowRight size={12} className="text-[var(--text-faint)]" aria-hidden="true" />}
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-center text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>
+            Traditional air-quality apps stop where stations end. AQI24 keeps going by estimating from nearby-station spatial information where supported.
+          </p>
+        </div>
+      </motion.section>
 
       {/* ── Location ─────────────────────────────────────────────────── */}
       <motion.section
@@ -110,7 +133,7 @@ export default function HomePage() {
             {greeting()}, {city}.
           </p>
           <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            Here&rsquo;s what tomorrow could look like.
+            Weather forecast and air-quality outlook for the next few days.
           </p>
         </motion.div>
         <ForecastDashboard />

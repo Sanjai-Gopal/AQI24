@@ -216,8 +216,8 @@ export default function MapPage() {
     <div className="max-w-6xl mx-auto px-4 pt-6 pb-4">
       <PageHeader
         eyebrow="Map"
-        title="Air quality around you"
-        description="Current air quality from monitoring stations and fire activity reported by NASA FIRMS, across the country."
+        title="Air quality, even where stations don't exist"
+        description="Select a location. AQI24 checks nearby monitoring stations and, when none is available, estimates air quality from nearby-station spatial information where supported."
         accent="sky"
       />
 
@@ -232,7 +232,28 @@ export default function MapPage() {
         {mode === 'air' ? <AQIPanel /> : <FiresPanel />}
       </motion.div>
 
-      <div className="mt-8">
+      <section className="panel p-4 mt-6">
+        <h3 className="text-sm font-bold mb-3 text-[var(--text-main)]">How AQI24 works</h3>
+        <ol className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 text-xs text-[var(--text-muted)]">
+          {[
+            ['Select a location', 'Search or click any place on the map.'],
+            ['Check nearby stations', 'AQI24 looks for monitoring stations close to the selection.'],
+            ['Estimate where needed', 'If no station exists, spatial estimation is used where supported.'],
+            ['Show method & confidence', 'Every value is labelled as observed, estimated or reference.'],
+            ['Add forecast & AI insights', 'Forecasting and model benchmarks are shown where available.'],
+          ].map(([title, desc], i) => (
+            <li key={title} className="flex gap-2.5">
+              <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[var(--brand-cyan)]/10 text-[var(--brand-cyan)] flex items-center justify-center text-[10px] font-mono">{i + 1}</span>
+              <span>
+                <strong className="block text-[var(--text-main)]">{title}</strong>
+                {desc}
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <div className="mt-6">
         <MethodologyNote accent="sky">
           Station markers use the standard AQI colour scale. Fire markers show satellite-detected thermal anomalies with an intensity estimate.
           Current feeds come from WAQI and NASA FIRMS; when a data source is unavailable, clearly-labelled reference records are shown instead — nothing is invented.

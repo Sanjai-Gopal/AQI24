@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
 import { aqiStations } from '../data/mockData';
+import { geocodeCity } from '../utils/api';
 
 const DEFAULT_CITY = 'Coimbatore';
 const STORAGE_KEY = 'aqi24_location';
@@ -14,8 +15,10 @@ function distanceSq(lat1, lng1, lat2, lng2) {
  * Shared location state for the whole app.
  *
  * Any page can read the selected city and its station metadata, change the
- * city, or ask the browser for the device location (which snaps to the
- * nearest known city). The selection is remembered across visits.
+ * city, or ask the browser for the device location. The selection is remembered
+ * across visits for known reference stations. Unknown cities are resolved with
+ * Open-Meteo geocoding and are not persisted, so the app never shows a stale
+ * default for a place it has not seen before.
  */
 export function LocationProvider({ children }) {
   const [city, setCity] = useState(() => {
@@ -26,17 +29,43 @@ export function LocationProvider({ children }) {
       return DEFAULT_CITY;
     }
   });
+  const [station, setStation] = useState(() => aqiStations.find(s => s.city === city) || aqiStations[0]);
   const [usingDeviceLocation, setUsingDeviceLocation] = useState(false);
   const [geoStatus, setGeoStatus] = useState('idle'); // idle | loading | ok | error
 
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, city); } catch { /* ignore */ }
+    try {
+      // Only persist known reference cities; geocoded selections are resolved on demand.
+      if (aqiStations.some(s => s.city === city)) {
+        localStorage.setItem(STORAGE_KEY, city);
+      }
+    } catch { /* ignore */ }
   }, [city]);
 
-  const selectCity = useCallback((c) => {
-    if (!c || !aqiStations.some(s => s.city === c)) return;
-    setCity(c);
-    setUsingDeviceLocation(false);
+  const selectCity = useCallback(async (c) => {
+    if (!c) return null;
+    const known = aqiStations.find(s => s.city === c);
+    if (known) {
+      setCity(known.city);
+      setStation(known);
+      setUsingDeviceLocation(false);
+      setGeoStatus('ok');
+      return known;
+    }
+    setGeoStatus('loading');
+    try {
+      const geo = await geocodeCity(c);
+      if (geo) {
+        const resolved = { city: geo.city, lat: geo.lat, lng: geo.lng, isGeocoded: true };
+        setCity(geo.city);
+        setStation(resolved);
+        setUsingDeviceLocation(false);
+        setGeoStatus('ok');
+        return resolved;
+      }
+    } catch { /* fall through */ }
+    setGeoStatus('error');
+    return null;
   }, []);
 
   const useDeviceLocation = useCallback(() => {
@@ -52,14 +81,13 @@ export function LocationProvider({ children }) {
         });
         setUsingDeviceLocation(true);
         setCity(nearest);
+        setStation(aqiStations.find(s => s.city === nearest) || aqiStations[0]);
         setGeoStatus('ok');
       },
       () => setGeoStatus('error'),
       { timeout: 8000, maximumAge: 600000 }
     );
   }, []);
-
-  const station = aqiStations.find(s => s.city === city) || aqiStations[0];
 
   const value = useMemo(() => ({
     city,

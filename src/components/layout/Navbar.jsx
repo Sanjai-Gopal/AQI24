@@ -21,7 +21,7 @@ export default function Navbar({ theme, onToggleTheme }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
-  const { isAuthenticated, configured, signOut } = useAuth();
+  const { isAuthenticated, configured, status, signOut } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -109,38 +109,50 @@ export default function Navbar({ theme, onToggleTheme }) {
             {theme === 'light' ? <Moon size={14} aria-hidden="true" /> : <Sun size={14} aria-hidden="true" />}
           </button>
 
-          {isAuthenticated ? (
-            <div className="flex items-center gap-1">
-              {accountItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    className={({ isActive }) =>
-                      `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                        isActive ? 'text-emerald-600 bg-emerald-500/10' : 'text-slate-500 hover:text-sky-600 hover:bg-sky-500/5'
-                      }`
-                    }
-                  >
-                    <Icon size={12} aria-hidden="true" />
-                    {item.label}
-                  </NavLink>
-                );
-              })}
+          {configured && status === 'checking' && (
+            <div className="flex items-center gap-2 px-3 py-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
+              <Loader2 size={14} className="animate-spin text-sky-500" aria-hidden="true" />
+              <span className="hidden sm:inline">Restoring session…</span>
             </div>
-          ) : (
-            <NavLink
-              to="/login"
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-white bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-500 transition-all shadow-md"
-            >
-              <LogIn size={12} aria-hidden="true" />
-              Sign in
-            </NavLink>
           )}
 
-          {configured && !isAuthenticated && (
-            <span className="sr-only">Sign in for saved locations and downloads</span>
+          {configured && status !== 'checking' && (
+            isAuthenticated ? (
+              <div className="flex items-center gap-1">
+                {accountItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      className={({ isActive }) =>
+                        `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                          isActive ? 'text-emerald-600 bg-emerald-500/10' : 'text-slate-500 hover:text-sky-600 hover:bg-sky-500/5'
+                        }`
+                      }
+                    >
+                      <Icon size={12} aria-hidden="true" />
+                      {item.label}
+                    </NavLink>
+                  );
+                })}
+                <button
+                  onClick={() => { signOut(); navigate('/'); }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:text-rose-500 hover:bg-rose-500/5 transition-all"
+                >
+                  <LogOut size={12} aria-hidden="true" />
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <NavLink
+                to="/login"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-white bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-500 transition-all shadow-md"
+              >
+                <LogIn size={12} aria-hidden="true" />
+                Sign in
+              </NavLink>
+            )
           )}
         </div>
 
@@ -194,7 +206,12 @@ export default function Navbar({ theme, onToggleTheme }) {
                 );
               })}
               <div className="my-2" style={{ borderTop: '1px solid var(--panel-border)' }} />
-              {isAuthenticated ? (
+              {configured && status === 'checking' ? (
+                <div className="px-3 py-2.5 text-xs flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+                  <Loader2 size={14} className="animate-spin text-sky-500" aria-hidden="true" />
+                  Restoring session…
+                </div>
+              ) : configured && isAuthenticated ? (
                 <>
                   {accountItems.map((item) => {
                     const Icon = item.icon;

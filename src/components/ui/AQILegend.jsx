@@ -12,13 +12,13 @@ const categories = [
 function AQILegend() {
   return (
     <div className="panel p-3 text-xs" role="img" aria-label="AQI color scale: Good, Moderate, Unhealthy for sensitive groups, Unhealthy, Very unhealthy, Hazardous">
-      <div className="text-slate-400 font-mono mb-2 text-xs tracking-wide">AQI SCALE</div>
+      <div className="text-[var(--text-faint)] font-mono mb-2 text-xs tracking-wide">AQI SCALE</div>
       <div className="space-y-1.5">
         {categories.map((c) => (
           <div key={c.label} className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ background: c.color }} aria-hidden="true" />
-            <span className="text-slate-300">{c.label}</span>
-            <span className="text-slate-600 ml-auto font-mono">{c.range}</span>
+            <span className="text-[var(--text-main)]">{c.label}</span>
+            <span className="text-[var(--text-muted)] ml-auto font-mono">{c.range}</span>
           </div>
         ))}
       </div>

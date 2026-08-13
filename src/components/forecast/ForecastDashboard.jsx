@@ -149,25 +149,29 @@ export default function ForecastDashboard({ detailed = false }) {
               </div>
             ) : tomorrow ? (
               <>
-                <div className="mt-4 flex items-center gap-4 flex-wrap">
-                  <WeatherIcon code={tomorrow.weatherCode} size={54} />
-                  <div>
-                    <div className="text-5xl font-black leading-none tracking-tight" style={{ color: 'var(--text-main)' }}>
-                      {tomorrow.tempMax != null ? `${tomorrow.tempMax}°` : '—'}
-                      {tomorrow.tempMin != null && <span className="text-xl font-semibold align-top" style={{ color: 'var(--text-faint)' }}> / {tomorrow.tempMin}°</span>}
-                    </div>
-                    <div className="mt-1 text-sm font-medium" style={{ color: 'var(--text-sub)' }}>
-                      {getWeatherLabel(tomorrow.weatherCode)}
+                <div className="mt-4">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-faint)] mb-2">Weather forecast</div>
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <WeatherIcon code={tomorrow.weatherCode} precipProb={tomorrow.precipProb} tempMax={tomorrow.tempMax} size={54} />
+                    <div>
+                      <div className="text-5xl font-black leading-none tracking-tight" style={{ color: 'var(--text-main)' }}>
+                        {tomorrow.tempMax != null ? `${tomorrow.tempMax}°` : '—'}
+                        {tomorrow.tempMin != null && <span className="text-xl font-semibold align-top" style={{ color: 'var(--text-faint)' }}> / {tomorrow.tempMin}°</span>}
+                      </div>
+                      <div className="mt-1 text-sm font-medium" style={{ color: 'var(--text-sub)' }}>
+                        {getWeatherLabel(tomorrow)}
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-5 rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid var(--panel-border)' }}>
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-faint)] mb-2">Air quality</div>
                   <div className="flex items-center gap-3 flex-wrap">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-semibold" style={{ color: 'var(--text-faint)' }}>Air quality</span>
-                        <span className="text-[10px] rounded-md px-1.5 py-0.5 font-medium" style={{ color: 'var(--text-muted)', background: 'rgba(100,116,139,0.10)' }}>Forecast AQI</span>
+                        <span className="text-[11px] font-semibold" style={{ color: 'var(--text-faint)' }}>AQI</span>
+                        <span className="text-[10px] rounded-md px-1.5 py-0.5 font-medium" style={{ color: 'var(--text-muted)', background: 'rgba(100,116,139,0.10)' }}>Atmospheric-model forecast</span>
                       </div>
                       <div className="mt-1 flex items-end gap-3 flex-wrap">
                         <div className="text-6xl font-black leading-none" style={{ color: getAQIColor(tomorrow.aqi) }}>{tomorrow.aqi}</div>
@@ -225,24 +229,28 @@ export default function ForecastDashboard({ detailed = false }) {
               {todayFc && <div className="text-[11px]" style={{ color: 'var(--text-faint)' }}>{friendlyDate(todayFc.date)}</div>}
             </div>
 
-            <div className="mt-3 flex items-center gap-3">
-              {todayFc && <WeatherIcon code={todayFc.weatherCode} size={34} />}
-              <div>
-                <div className="text-3xl font-black leading-none" style={{ color: 'var(--text-main)' }}>
-                  {todayFc?.tempMax != null ? `${todayFc.tempMax}°` : weather?.temperature != null ? `${Math.round(weather.temperature)}°` : '—'}
-                </div>
-                {todayFc?.weatherCode != null && (
-                  <div className="text-[11px] font-medium mt-0.5" style={{ color: 'var(--text-sub)' }}>
-                    {getWeatherLabel(todayFc.weatherCode)}
+            <div className="mt-3">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-faint)] mb-2">Weather</div>
+              <div className="flex items-center gap-3">
+                {todayFc && <WeatherIcon code={todayFc.weatherCode} precipProb={todayFc.precipProb} tempMax={todayFc.tempMax} size={34} />}
+                <div>
+                  <div className="text-3xl font-black leading-none" style={{ color: 'var(--text-main)' }}>
+                    {todayFc?.tempMax != null ? `${todayFc.tempMax}°` : weather?.temperature != null ? `${Math.round(weather.temperature)}°` : '—'}
                   </div>
-                )}
+                  {todayFc?.weatherCode != null && (
+                    <div className="text-[11px] font-medium mt-0.5" style={{ color: 'var(--text-sub)' }}>
+                      {getWeatherLabel(todayFc)}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
             <div className="mt-4 rounded-2xl p-3.5" style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid var(--panel-border)' }}>
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-faint)] mb-1.5">Air quality</div>
               <div className="flex items-end justify-between gap-3">
                 <div>
-                  <div className="text-[11px] font-semibold" style={{ color: 'var(--text-faint)' }}>Air quality</div>
+                  <div className="text-[11px] font-semibold" style={{ color: 'var(--text-faint)' }}>AQI</div>
                   {todayAQI != null ? (
                     <div className="mt-1 text-4xl font-black leading-none" style={{ color: getAQIColor(todayAQI) }}>{todayAQI}</div>
                   ) : (
@@ -288,7 +296,10 @@ export default function ForecastDashboard({ detailed = false }) {
       {/* ── Coming days ─────────────────────────────────────────────── */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14 }} className="panel p-5">
         <div className="flex items-center justify-between mb-4">
-          <div className="text-sm font-bold" style={{ color: 'var(--text-main)' }}>Coming days</div>
+          <div>
+            <div className="text-sm font-bold" style={{ color: 'var(--text-main)' }}>Coming days</div>
+            <div className="text-[10px]" style={{ color: 'var(--text-faint)' }}>Weather + atmospheric-model AQI forecast</div>
+          </div>
           {fcStatus === 'loading'
             ? <Loader2 size={14} className="animate-spin text-sky-500" aria-hidden="true" />
             : fcError && <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Forecast temporarily unavailable</span>}
@@ -301,7 +312,7 @@ export default function ForecastDashboard({ detailed = false }) {
                 <div key={d.date} className="rounded-2xl p-3 text-center transition-all hover:-translate-y-0.5"
                   style={{ background: `${color}0a`, border: `1px solid ${color}1c` }}>
                   <div className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--text-faint)' }}>{dayLabel(d.date, i)}</div>
-                  <div className="mt-2 flex justify-center"><WeatherIcon code={d.weatherCode} size={26} /></div>
+                  <div className="mt-2 flex justify-center"><WeatherIcon code={d.weatherCode} precipProb={d.precipProb} tempMax={d.tempMax} size={26} /></div>
                   <div className="mt-1.5 text-lg font-bold leading-none" style={{ color: 'var(--text-main)' }}>
                     {d.tempMax != null ? `${d.tempMax}°` : '—'}
                   </div>
@@ -360,8 +371,8 @@ export default function ForecastDashboard({ detailed = false }) {
   );
 }
 
-function getWeatherLabel(code) {
-  const { label } = weatherInfo(code);
+function getWeatherLabel(day) {
+  const { label } = weatherInfo(day?.weatherCode, { precipProb: day?.precipProb, tempMax: day?.tempMax });
   return label || 'Forecast';
 }
 

@@ -4,8 +4,8 @@ import { X } from 'lucide-react';
 export function MapPanel({ children, className = '', style = {}, ...rest }) {
   return (
     <div
-      className={`pointer-events-auto bg-[#080d18]/90 border border-cyan-500/15 backdrop-blur-md shadow-lg transition-colors ${className}`}
-      style={style}
+      className={`pointer-events-auto rounded-xl backdrop-blur-md shadow-lg transition-colors ${className}`}
+      style={{ background: 'var(--panel-bg)', border: '1px solid var(--panel-border)', ...style }}
       {...rest}
     >
       {children}
@@ -27,8 +27,8 @@ export function MapStyleSwitcher({ options, value, onChange }) {
           title={label}
           className={`px-2.5 py-1.5 rounded-lg text-[11px] font-mono transition-all flex items-center gap-1 ${
             value === key
-              ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/35'
-              : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
+              ? 'bg-[var(--brand-cyan)]/20 text-[var(--brand-cyan)] border border-[var(--brand-cyan)]/35'
+              : 'text-[var(--text-faint)] hover:text-[var(--text-main)] hover:bg-[var(--text-main)]/5 border border-transparent'
           }`}
         >
           <Icon size={11} aria-hidden="true" />
@@ -55,7 +55,7 @@ export function MapCloseButton({ onClick, label }) {
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 transition-all"
+      className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-faint)] hover:text-[var(--text-main)] hover:bg-[var(--text-main)]/10 transition-all"
     >
       <X size={13} aria-hidden="true" />
     </button>

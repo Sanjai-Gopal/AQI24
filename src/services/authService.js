@@ -29,7 +29,8 @@ export function isAuthConfigured() {
 }
 
 async function request(path, { method = 'POST', body, token } = {}) {
-  const res = await fetch(`${SUPABASE_URL}${path}`, {
+  const baseUrl = (SUPABASE_URL || '').replace(/\/$/, '');
+  const res = await fetch(`${baseUrl}${path}`, {
     method,
     headers: {
       'Content-Type': 'application/json',
@@ -73,9 +74,11 @@ function buildSession(data) {
 
 // ─── PKCE helpers ────────────────────────────────────────────────────────
 function randomVerifier() {
-  const bytes = new Uint8Array(64);
+  // PKCE code verifier: 128 URL-safe characters (A-Z, a-z, 0-9, '-', '.', '_', '~').
+  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+  const bytes = new Uint8Array(128);
   crypto.getRandomValues(bytes);
-  return Array.from(bytes, b => String.fromCharCode(b % 86 + 40)).join('');
+  return Array.from(bytes, b => charset[b % charset.length]).join('');
 }
 
 async function sha256Challenge(verifier) {
@@ -87,12 +90,13 @@ async function sha256Challenge(verifier) {
 
 /** Parse `code`/`state` out of the URL hash (hash-routed callback). */
 export function getOAuthCallbackParams() {
-  const raw = window.location.hash;
-  const qi = raw.indexOf('?');
-  if (qi === -1) return null;
-  const params = new URLSearchParams(raw.slice(qi + 1));
-  const code = params.get('code');
-  const state = params.get('state');
+  // Supabase may place the OAuth query parameters either before or after the
+  // hash-router fragment. Check both so the callback is recognised either way.
+  const searchParams = new URLSearchParams(window.location.search);
+  const hash = window.location.hash;
+  const hashQuery = hash.includes('?') ? new URLSearchParams(hash.slice(hash.indexOf('?') + 1)) : new URLSearchParams();
+  const code = searchParams.get('code') || hashQuery.get('code');
+  const state = searchParams.get('state') || hashQuery.get('state');
   if (!code) return null;
   return { code, state };
 }
@@ -142,7 +146,7 @@ export async function signInWithGoogle(from = '') {
       `?provider=google` +
       `&redirect_to=${encodeURIComponent(redirectTo)}` +
       `&code_challenge=${codeChallenge}` +
-      `&code_challenge_method=s256` +
+      `&code_challenge_method=S256` +
       `&state=${state}`;
     window.location.assign(url);
     return { ok: true, error: null };
@@ -155,7 +159,7 @@ export async function signInWithGoogle(from = '') {
 export async function exchangeCodeForSession(code, verifier) {
   if (!isAuthConfigured()) return notConfigured();
   try {
-    const data = await request('/auth/v1/token?grant_type=authorization_code', {
+    const data = await request('/auth/v1/token?grant_type=pkce', {
       body: { auth_code: code, code_verifier: verifier },
     });
     if (!data.access_token) return { session: null, error: 'Sign-in could not be completed.' };
