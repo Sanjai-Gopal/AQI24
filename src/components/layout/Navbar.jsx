@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Home, CloudSun, History, Map as MapIcon, FlaskConical, Sun, Moon, User, MapPin, LogIn, LogOut, Sparkles } from 'lucide-react';
+import { Menu, X, Home, CloudSun, History, Map as MapIcon, FlaskConical, Sun, Moon, User, MapPin, LogIn, LogOut, Sparkles, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const navItems = [
